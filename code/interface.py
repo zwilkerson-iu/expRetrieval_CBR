@@ -1,4 +1,3 @@
-from skimage.io import imread
 import os
 import sys
 import random

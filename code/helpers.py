@@ -4,7 +4,7 @@ from reader import Reader
 from feature import Feature
 from deepNetwork import DeepImageNetwork
 
-from skimage.io import imread
+# from skimage.io import imread
 import numpy as np
 import tensorflow as tf
 import os
@@ -149,13 +149,13 @@ def duplicatedFeatureValidation(caseBase:CaseBase, numberOfIterations:int, k:int
 #TODO: documentation here!
 def generateImageSample(numImagesPerAnimal:int, rootDir:str):
         images = []
-        classes = os.listdir(rootDir + "awa2/JPEGImages")
-        for animal in classes:
-            imageFiles = os.listdir(rootDir + "awa2/JPEGImages/" + animal)
-            imageTemps = random.sample(imageFiles, numImagesPerAnimal)
-            for filepath in imageTemps:
-                temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + filepath, as_gray = False)
-                images.append(temp)
+        # classes = os.listdir(rootDir + "awa2/JPEGImages")
+        # for animal in classes:
+        #     imageFiles = os.listdir(rootDir + "awa2/JPEGImages/" + animal)
+        #     imageTemps = random.sample(imageFiles, numImagesPerAnimal)
+        #     for filepath in imageTemps:
+        #         temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + filepath, as_gray = False)
+        #         images.append(temp)
         return images
 
 #TODO: documentation here!
