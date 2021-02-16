@@ -17,7 +17,7 @@ def run(runningSystem:str):
     cb = CaseBase()
 
     if runningSystem == "local":
-        rootDir = "../expRetrieval_CBR_data/"
+        rootDir = "../../expRetrieval_CBR_data/"
     else:
         rootDir = "/l/vision/magnemite/research-zachwilk/expRetrieval_CBR_data/" #TODO: verify this
     numIterations = 30
