@@ -18,7 +18,7 @@ def run(runningSystem:str):
     if runningSystem == "local":
         rootDir = "../../expRetrieval_CBR_data/"
     else:
-        rootDir = "/l/vision/magnemite/research-zachwilk/expRetrieval_CBR_data/" #TODO: verify this
+        rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/"
     numIterations = 30
     partialFeatureValidationMax = 20
     maxNumEpochs = 100
