@@ -116,7 +116,8 @@ def partialFeatureValidation(caseBase:CaseBase, numberOfIterations:int, partiali
                 if random.random() < partialityThreshold:
                     temp.addNewFeature(case.features[featureName])
         else:
-            for featureName in random.sample(list(case.features.keys()), partialityThreshold):
+            print(case.features.keys())
+            for featureName in random.sample(list(case.features.keys()), min(partialityThreshold, len(list(case.features.keys())))):
                 temp.addNewFeature(case.features[featureName])
         neighbors = caseBase.getKClosestCases(temp, k)
         queryResult = majorityRule(caseBase, neighbors)
