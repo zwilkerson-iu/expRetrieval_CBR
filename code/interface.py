@@ -17,8 +17,8 @@ def run(runningSystem:str):
 
     if runningSystem == "local":
         rootDir = "../../expRetrieval_CBR_data/"
-    else:
-        rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/"
+    else: #remote
+        rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
     numIterations = 30
     partialFeatureValidationMax = 20
     maxNumEpochs = 100
@@ -50,9 +50,9 @@ def run(runningSystem:str):
             # for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
             #     initialCB.addCase(case)
             # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
-            for examplesPerAnimal in [1]:
+            for examplesPerAnimal in [1, 5, 10]:
                 images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(40, int(userInput[1])+1, 10):
+                for features in range(10, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
