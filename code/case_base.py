@@ -75,6 +75,7 @@ class CaseBase:
     def addCase(self, case:Case):
         caseID = hash(case)
         if caseID in self.cases:
+            print("error adding case")
             return False
         else:
             for feature in case.features.keys():
