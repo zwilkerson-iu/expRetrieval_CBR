@@ -304,6 +304,7 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
                 testCB.addCase(case)
             if testCB.caseBaseSize != 50 * examplesPerAnimal:
                 print("Race condition error")
+                k -= 1
                 continue
             results.append(duplicatedFeatureValidation(testCB, 1000))
             if printResults:
