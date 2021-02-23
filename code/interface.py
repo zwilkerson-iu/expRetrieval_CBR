@@ -96,9 +96,9 @@ def run(runningSystem:str):
                 print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
 
         elif userInput[0] == "removalTest":
-            for examplesPerAnimal in [2,5,10]: #WARNING - DO NOT use 1! This does not work
+            for examplesPerAnimal in [2,5]: #WARNING - DO NOT use 1! This does not work
                 images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(20, int(userInput[1])+1, 20):
+                for features in range(10, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
