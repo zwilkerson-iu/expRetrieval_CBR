@@ -295,13 +295,14 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
             extractor = tf.keras.Model(inputs=network.model.input,\
                                         outputs=network.model.layers[len(network.model.layers)-2].output)
             outputs = extractor.predict(resized_images)
-            testCB = CaseBase()
+            # testCB = CaseBase()
             if useExpertFeatures == '0':
                 cases = generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, False, False)
             else:
                 cases = generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, True, False)
-            for case in cases:
-                testCB.addCase(case)
+            # for case in cases:
+            #     testCB.addCase(case)
+            testCB = cbHelper(cases)
             if testCB.caseBaseSize != 50 * examplesPerAnimal:
                 print("Race condition error", len(cases), testCB.caseBaseSize)
                 continue
@@ -312,3 +313,9 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
             print(sum(results)/len(results))
             print(statistics.stdev(results))
         return results
+
+def cbHelper(listOfCases:list):
+    cb = CaseBase()
+    for case in listOfCases:
+        cb.addCase(case)
+    return cb
