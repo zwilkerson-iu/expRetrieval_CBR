@@ -52,7 +52,7 @@ def run(runningSystem:str):
             # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
             for examplesPerAnimal in [5]:
                 images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(80, int(userInput[1])+1, 10):
+                for features in range(60, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
