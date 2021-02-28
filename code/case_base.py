@@ -1,5 +1,7 @@
 from case import Case
 
+from random import randint
+
 class CaseBase:
 
     """
@@ -49,10 +51,12 @@ class CaseBase:
                     normalizedDistance += temp
             
             if len(bestCases) < k or normalizedDistance < bestCases[-1][1]:
-                bestCases.insert(0, (caseID, normalizedDistance))
+                # bestCases.insert(0, (caseID, normalizedDistance))
+                bestCases.insert(0, (caseID, normalizedDistance, randint(1,k))) #Ties broken randomly
                 if len(bestCases) > k:
                     bestCases.pop()
-                bestCases.sort(key = lambda x : x[1])
+                # bestCases.sort(key = lambda x : x[1])
+                bestCases.sort(key = lambda x : (x[1], x[2]))
         return bestCases
 
     """

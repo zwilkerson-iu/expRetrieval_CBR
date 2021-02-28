@@ -20,7 +20,8 @@ def majorityRule(caseBase:CaseBase, neighbors:list, mode:str = "majority"):
         regressionFlag = True
     resultOptions = {}
     if mode == "majority":
-        for caseID, _ in neighbors:
+        # for caseID, _ in neighbors:
+        for caseID, _, _ in neighbors:
             resultTemp = caseBase.retrieveCase(caseID).result
             if resultOptions.get(resultTemp) is not None:
                 if not regressionFlag:
@@ -153,6 +154,7 @@ def generateImageSample(numImagesPerAnimal:int, rootDir:str):
         for animal in classes:
             imageFiles = os.listdir(rootDir + "awa2/JPEGImages/" + animal)
             imageTemps = random.sample(imageFiles, numImagesPerAnimal)
+            print(animal + "," + ",".join(x for x in imageTemps))
             for filepath in imageTemps:
                 temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + filepath, as_gray = False)
                 images.append(temp)
@@ -244,7 +246,7 @@ def runTests(cb:CaseBase, numIterations:int, printResults:bool = True, partialFe
         return results
 
 #TODO: documentation here!
-def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, images:list, rootDir:str, useExpertFeatures:str,
+def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, images:list, rootDir:str, useExpertFeatures:str, imageGen:str,
                         printResults:bool = True, partialFeatureValidationMax:int = None):
     if partialFeatureValidationMax is not None:
         results = {}
@@ -252,6 +254,8 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
                 results[j] = []
         for k in range(numIterations):
             tf.keras.backend.clear_session()
+            if imageGen == "1":
+                images = generateImageSample(examplesPerAnimal, rootDir)
             network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
             resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
             extractor = tf.keras.Model(inputs=network.model.input,\

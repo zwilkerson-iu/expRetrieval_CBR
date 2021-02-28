@@ -16,11 +16,11 @@ class Case:
     """
     Hash function for case (just a sum of the hash values for its attributes)
     """
-    def __hash__(self):
-        hashSum = 0.0
-        for feature in self.features.values():
-            hashSum += hash(feature)
-        return hash(hashSum)
+    # def __hash__(self):
+    #     hashSum = 0.0
+    #     for feature in self.features.values():
+    #         hashSum += hash(feature)
+    #     return hash(hashSum)
 
     """
     To-string representation for a case, highlighting features and the result

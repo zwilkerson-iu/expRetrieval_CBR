@@ -50,15 +50,18 @@ def run(runningSystem:str):
             # for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
             #     initialCB.addCase(case)
             # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
-            for examplesPerAnimal in [5]:
-                images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(80, int(userInput[1])+1, 10):
+            for examplesPerAnimal in [1]:
+                images = []
+                if userInput[4] == "0":
+                    images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                for features in range(10, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
                     if userInput[3] != 'retrain':
-                        #TODO: beginning here, prepare for NN-retrain
                         tf.keras.backend.clear_session()
+                        if userInput[4] == "1":
+                            images = helpers.generateImageSample(examplesPerAnimal, rootDir)
                         network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
                         resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
                         extractor = tf.keras.Model(inputs=network.model.input,\
@@ -73,7 +76,7 @@ def run(runningSystem:str):
                             testCB.addCase(case)
                         results = helpers.runTests(testCB, numIterations, True, partialFeatureValidationMax)
                     else:
-                        results = helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], True, partialFeatureValidationMax)
+                        results = helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4], True, partialFeatureValidationMax)
                     #do anything with reuslts?
 
         elif userInput[0] == "epochs":
@@ -96,13 +99,18 @@ def run(runningSystem:str):
                 print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
 
         elif userInput[0] == "removalTest":
+            images = []
             for examplesPerAnimal in [2,5]: #WARNING - DO NOT use 1! This does not work
-                images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                if userInput[4] == "0":
+                    images = helpers.generateImageSample(examplesPerAnimal, rootDir)
                 for features in range(10, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
                     if userInput[3] != "retrain":
+                        tf.keras.backend.clear_session()
+                        if userInput[4] == "1":
+                            images = helpers.generateImageSample(examplesPerAnimal, rootDir)
                         network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
                         resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
                         extractor = tf.keras.Model(inputs=network.model.input,\
@@ -121,7 +129,7 @@ def run(runningSystem:str):
                         else:
                             results = helpers.runTests(testCB, numIterations)
                     else:
-                        helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2])
+                        helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4])
         
         elif userInput[0] == "weightTest":
             predicates, train, classes = Reader().readAwAForNN()
