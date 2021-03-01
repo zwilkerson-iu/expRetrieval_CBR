@@ -294,6 +294,8 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
         results = []
         for k in range(numIterations):
             tf.keras.backend.clear_session()
+            if imageGen == "1":
+                images = generateImageSample(examplesPerAnimal, rootDir)
             network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
             resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
             extractor = tf.keras.Model(inputs=network.model.input,\
