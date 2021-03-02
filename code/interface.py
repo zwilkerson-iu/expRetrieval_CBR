@@ -50,11 +50,11 @@ def run(runningSystem:str):
             # for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
             #     initialCB.addCase(case)
             # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
-            for examplesPerAnimal in [5,10]:
+            for examplesPerAnimal in [5]:
                 images = []
                 if userInput[4] == "0":
                     images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(10, int(userInput[1])+1, 10):
+                for features in range(110, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
