@@ -170,8 +170,12 @@ def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int,
                 index = classes.index(case.result[0])
                 for i in range(len(learnedFeatures[0])):
                     sumTemp = 0.0
+                    divisorTemp = numImagesPerAnimal
                     for j in range(numImagesPerAnimal):
-                        sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
+                        try:
+                            sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
+                        except:
+                            divisorTemp -= 1
                     case.addNewFeature(Feature("Feature" + str(i), sumTemp / numImagesPerAnimal, 1, "euclideanDistance"))
                 cases.append(case)
         else:
@@ -180,8 +184,12 @@ def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int,
                 index = classes.index(caseName)
                 for i in range(len(learnedFeatures[0])):
                     sumTemp = 0.0
+                    divisorTemp = numImagesPerAnimal
                     for j in range(numImagesPerAnimal):
-                        sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
+                        try:
+                            sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
+                        except:
+                            divisorTemp -= 1
                     temp.addNewFeature(Feature("Feature" + str(i), sumTemp / numImagesPerAnimal, 1, "euclideanDistance"))
                 cases.append(temp)
     else: #removalTest
@@ -189,20 +197,26 @@ def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int,
             for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
                 index = classes.index(case.result[0])
                 for j in range(numImagesPerAnimal):
-                    temp = Case({}, (case.result[0], 1.0))
-                    for feature in case.features.values():
-                        temp.addNewFeature(feature)
-                    for i in range(len(learnedFeatures[0])):
-                        temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
-                    cases.append(temp)
+                    try:
+                        temp = Case({}, (case.result[0], 1.0))
+                        for feature in case.features.values():
+                            temp.addNewFeature(feature)
+                        for i in range(len(learnedFeatures[0])):
+                            temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
+                        cases.append(temp)
+                    except:
+                        continue
         else:
             for caseName in classes:
                 index = classes.index(caseName)
                 for j in range(numImagesPerAnimal):
-                    temp = Case({}, (caseName, 1.0))
-                    for i in range(len(learnedFeatures[0])):
-                        temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
-                    cases.append(temp)
+                    try:
+                        temp = Case({}, (caseName, 1.0))
+                        for i in range(len(learnedFeatures[0])):
+                            temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
+                        cases.append(temp)
+                    except:
+                        continue
     return cases
 
 #TODO: documentation here!
