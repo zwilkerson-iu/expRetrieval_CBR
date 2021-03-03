@@ -172,10 +172,7 @@ def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int,
                     sumTemp = 0.0
                     divisorTemp = numImagesPerAnimal
                     for j in range(numImagesPerAnimal):
-                        try:
-                            sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
-                        except:
-                            divisorTemp -= 1
+                        sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
                     case.addNewFeature(Feature("Feature" + str(i), sumTemp / numImagesPerAnimal, 1, "euclideanDistance"))
                 cases.append(case)
         else:
@@ -186,10 +183,7 @@ def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int,
                     sumTemp = 0.0
                     divisorTemp = numImagesPerAnimal
                     for j in range(numImagesPerAnimal):
-                        try:
-                            sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
-                        except:
-                            divisorTemp -= 1
+                        sumTemp += learnedFeatures[index * numImagesPerAnimal + j][i]
                     temp.addNewFeature(Feature("Feature" + str(i), sumTemp / numImagesPerAnimal, 1, "euclideanDistance"))
                 cases.append(temp)
     else: #removalTest
@@ -197,26 +191,20 @@ def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int,
             for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
                 index = classes.index(case.result[0])
                 for j in range(numImagesPerAnimal):
-                    try:
-                        temp = Case({}, (case.result[0], 1.0))
-                        for feature in case.features.values():
-                            temp.addNewFeature(feature)
-                        for i in range(len(learnedFeatures[0])):
-                            temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
-                        cases.append(temp)
-                    except:
-                        continue
+                    temp = Case({}, (case.result[0], 1.0))
+                    for feature in case.features.values():
+                        temp.addNewFeature(feature)
+                    for i in range(len(learnedFeatures[0])):
+                        temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
+                    cases.append(temp)
         else:
             for caseName in classes:
                 index = classes.index(caseName)
                 for j in range(numImagesPerAnimal):
-                    try:
-                        temp = Case({}, (caseName, 1.0))
-                        for i in range(len(learnedFeatures[0])):
-                            temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
-                        cases.append(temp)
-                    except:
-                        continue
+                    temp = Case({}, (caseName, 1.0))
+                    for i in range(len(learnedFeatures[0])):
+                        temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
+                    cases.append(temp)
     return cases
 
 #TODO: documentation here!
@@ -267,11 +255,20 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
         for j in range(1, partialFeatureValidationMax+1):
                 results[j] = []
         for k in range(numIterations):
-            tf.keras.backend.clear_session()
             if imageGen == "1":
                 images = generateImageSample(examplesPerAnimal, rootDir)
-            network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-            resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+            invalidImageExistsFlag = True
+            while invalidImageExistsFlag:
+                print("entering while loop")
+                try:
+                    tf.keras.backend.clear_session()
+                    network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
+                    resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                    invalidImageExistsFlag = False
+                except:
+                    print("invalid image found - resetting seed")
+                    images = generateImageSample(examplesPerAnimal, rootDir)
+                    continue
             extractor = tf.keras.Model(inputs=network.model.input,\
                                         outputs=network.model.layers[len(network.model.layers)-2].output)
             outputs = extractor.predict(resized_images)
@@ -307,11 +304,20 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
     else: #removal test
         results = []
         for k in range(numIterations):
-            tf.keras.backend.clear_session()
             if imageGen == "1":
                 images = generateImageSample(examplesPerAnimal, rootDir)
-            network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-            resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+            invalidImageExistsFlag = True
+            while invalidImageExistsFlag:
+                print("entering while loop")
+                try:
+                    tf.keras.backend.clear_session()
+                    network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
+                    resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                    invalidImageExistsFlag = False
+                except:
+                    print("invalid image found - resetting seed")
+                    images = generateImageSample(examplesPerAnimal, rootDir)
+                    continue
             extractor = tf.keras.Model(inputs=network.model.input,\
                                         outputs=network.model.layers[len(network.model.layers)-2].output)
             outputs = extractor.predict(resized_images)
