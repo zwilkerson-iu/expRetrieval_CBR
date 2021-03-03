@@ -23,6 +23,8 @@ def run(runningSystem:str):
     partialFeatureValidationMax = 20
     maxNumEpochs = 100
 
+    print("Ready for command:")
+
     while True:
         userInput = input().split(" ")
         #===================================
@@ -61,9 +63,9 @@ def run(runningSystem:str):
                     if userInput[3] != 'retrain':
                         if userInput[4] == "1":
                             images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                        tf.keras.backend.clear_session()
                         invalidImageExistsFlag = True
                         while invalidImageExistsFlag:
+                            tf.keras.backend.clear_session()
                             try:
                                 network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
                                 resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
@@ -108,7 +110,7 @@ def run(runningSystem:str):
 
         elif userInput[0] == "removalTest":
             images = []
-            for examplesPerAnimal in [2,5]: #WARNING - DO NOT use 1! This does not work
+            for examplesPerAnimal in [5]: #WARNING - DO NOT use 1! This does not work
                 if userInput[4] == "0":
                     images = helpers.generateImageSample(examplesPerAnimal, rootDir)
                 for features in range(10, int(userInput[1])+1, 10):
@@ -116,11 +118,19 @@ def run(runningSystem:str):
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
                     if userInput[3] != "retrain":
-                        tf.keras.backend.clear_session()
                         if userInput[4] == "1":
                             images = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                        network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                        resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                        invalidImageExistsFlag = True
+                        while invalidImageExistsFlag:
+                            tf.keras.backend.clear_session()
+                            try:
+                                network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
+                                resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                                invalidImageExistsFlag = False
+                            except:
+                                print("invalid image found - resetting seed")
+                                images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                                continue
                         extractor = tf.keras.Model(inputs=network.model.input,\
                                                     outputs=network.model.layers[len(network.model.layers)-2].output)
                         outputs = extractor.predict(resized_images)
