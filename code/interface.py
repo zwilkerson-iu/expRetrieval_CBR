@@ -100,7 +100,7 @@ def run(runningSystem:str):
 
         elif userInput[0] == "removalTest":
             images = []
-            for examplesPerAnimal in [2]: #WARNING - DO NOT use 1! This does not work
+            for examplesPerAnimal in [2,5]: #WARNING - DO NOT use 1! This does not work
                 if userInput[4] == "0":
                     images = helpers.generateImageSample(examplesPerAnimal, rootDir)
                 for features in range(10, int(userInput[1])+1, 10):
