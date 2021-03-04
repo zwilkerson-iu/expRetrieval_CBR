@@ -52,27 +52,27 @@ def run(runningSystem:str):
             # for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
             #     initialCB.addCase(case)
             # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
-            for examplesPerAnimal in [5]:
+            for examplesPerAnimal in [1,5]:
                 images = []
                 if userInput[4] == "0":
-                    images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                    images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
                 for features in range(10, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
                     if userInput[3] != 'retrain':
                         if userInput[4] == "1":
-                            images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                            images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
                         invalidImageExistsFlag = True
                         while invalidImageExistsFlag:
                             tf.keras.backend.clear_session()
                             try:
                                 network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                                resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                                resized_images = network.train(np.array(images), np.array(labels), 5)
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
-                                images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                                images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
                                 continue
                         extractor = tf.keras.Model(inputs=network.model.input,\
                                                     outputs=network.model.layers[len(network.model.layers)-2].output)
@@ -112,24 +112,24 @@ def run(runningSystem:str):
             images = []
             for examplesPerAnimal in [5]: #WARNING - DO NOT use 1! This does not work
                 if userInput[4] == "0":
-                    images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                    images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
                 for features in range(10, int(userInput[1])+1, 10):
                     print("==================")
                     print(str(examplesPerAnimal) + " images used per class")
                     print(str(features) + " used in the neural network")
                     if userInput[3] != "retrain":
                         if userInput[4] == "1":
-                            images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                            images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
                         invalidImageExistsFlag = True
                         while invalidImageExistsFlag:
                             tf.keras.backend.clear_session()
                             try:
                                 network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                                resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                                resized_images = network.train(np.array(images), np.array(labels), 5)
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
-                                images = helpers.generateImageSample(examplesPerAnimal, rootDir)
+                                images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
                                 continue
                         extractor = tf.keras.Model(inputs=network.model.input,\
                                                     outputs=network.model.layers[len(network.model.layers)-2].output)

@@ -150,15 +150,18 @@ def duplicatedFeatureValidation(caseBase:CaseBase, numberOfIterations:int, k:int
 #TODO: documentation here!
 def generateImageSample(numImagesPerAnimal:int, rootDir:str):
         images = []
+        labels = []
         classes = os.listdir(rootDir + "awa2/JPEGImages")
-        for animal in classes:
+        for index in range(len(classes)):
+            animal = classes[index]
             imageFiles = os.listdir(rootDir + "awa2/JPEGImages/" + animal)
             imageTemps = random.sample(imageFiles, numImagesPerAnimal)
             print(animal + "," + ",".join(x for x in imageTemps))
             for filepath in imageTemps:
                 temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + filepath, as_gray = False)
                 images.append(temp)
-        return images
+            labels = labels + [index] * numImagesPerAnimal
+        return (images, labels)
 
 #TODO: documentation here!
 def generateCaseListWithLearnedFeatures(learnedFeatures, numImagesPerAnimal:int, rootDir:str, useExpertFeatures:bool = True, matchTest = True):
@@ -256,17 +259,17 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
                 results[j] = []
         for k in range(numIterations):
             if imageGen == "1":
-                images = generateImageSample(examplesPerAnimal, rootDir)
+                images, labels = generateImageSample(examplesPerAnimal, rootDir)
             invalidImageExistsFlag = True
             while invalidImageExistsFlag:
                 try:
                     tf.keras.backend.clear_session()
                     network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                    resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                    resized_images = network.train(np.array(images), np.array(labels), 5)
                     invalidImageExistsFlag = False
                 except:
                     print("invalid image found - resetting seed")
-                    images = generateImageSample(examplesPerAnimal, rootDir)
+                    images, labels = generateImageSample(examplesPerAnimal, rootDir)
                     continue
             extractor = tf.keras.Model(inputs=network.model.input,\
                                         outputs=network.model.layers[len(network.model.layers)-2].output)
@@ -304,21 +307,28 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
         results = []
         for k in range(numIterations):
             if imageGen == "1":
-                images = generateImageSample(examplesPerAnimal, rootDir)
+                images, labels = generateImageSample(examplesPerAnimal, rootDir)
             invalidImageExistsFlag = True
             while invalidImageExistsFlag:
                 try:
                     tf.keras.backend.clear_session()
                     network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                    resized_images = network.train(np.array(images), np.array([0] * len(images)), 5)
+                    resized_images = network.train(np.array(images), np.array(labels), 5)
                     invalidImageExistsFlag = False
                 except:
                     print("invalid image found - resetting seed")
-                    images = generateImageSample(examplesPerAnimal, rootDir)
+                    images, labels = generateImageSample(examplesPerAnimal, rootDir)
                     continue
             extractor = tf.keras.Model(inputs=network.model.input,\
                                         outputs=network.model.layers[len(network.model.layers)-2].output)
+            print(network.model.layers[len(network.model.layers)-2].output)
+            print(network.model.layers[len(network.model.layers)-1].output)
+            temp = network.predict(resized_images)
             outputs = extractor.predict(resized_images)
+            weights = network.model.trainable_weights[4].numpy()
+            print(temp[:20])
+            print(outputs[:20])
+            # print(weights[:10])
             testCB = CaseBase()
             if useExpertFeatures == '0':
                 cases = generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, False, False)
