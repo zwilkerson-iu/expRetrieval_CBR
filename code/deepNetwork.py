@@ -36,11 +36,11 @@ class DeepImageNetwork:
     """
     def train(self, train_images:np.array, train_labels:np.array, numEpochs:int = 10):
         resized_images = []
+        print(train_labels)
         for i in range(len(train_images)):
             resized_images.append(tf.keras.preprocessing.image.smart_resize(train_images[i], (1200,1200)))
         resized_images = np.array(resized_images)
         self.model.fit(resized_images, train_labels, epochs=numEpochs, verbose=1)
-        # self.model.fit(resized_images, train_labels, epochs=numEpochs, verbose=1)
         return resized_images
 
     """

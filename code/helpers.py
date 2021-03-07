@@ -313,7 +313,7 @@ def runTests_retrain(numIterations:int, features:int, examplesPerAnimal:int, ima
                 try:
                     tf.keras.backend.clear_session()
                     network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                    resized_images = network.train(np.array(images), np.array(labels), 5)
+                    resized_images = network.train(np.array(images), np.array(labels), 20)
                     invalidImageExistsFlag = False
                 except:
                     print("invalid image found - resetting seed")
