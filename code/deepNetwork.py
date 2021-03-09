@@ -82,8 +82,6 @@ class FeatureNetwork:
     """
     def train(self, train_featuresList:np.array, train_labels:np.array, numEpochs:int = 10):
         self.model.fit(train_featuresList, train_labels, epochs=numEpochs, verbose=0)
-        # print(self.model.trainable_weights)
-        # print(self.model.trainable_weights[0].numpy())
 
     """
     Prediction algorithm for trained neural network

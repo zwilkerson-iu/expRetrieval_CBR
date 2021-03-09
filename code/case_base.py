@@ -19,7 +19,6 @@ class CaseBase:
             self.cases[caseID] = initialCases[caseID]
             self.caseBaseSize += 1
         self.maxima = {}
-        #Other potential fields = _cbAltered, caseIdName, indexing, comparisonDict
 
     """
     Formal getter method for the case base (probably unnecessary)
@@ -51,11 +50,9 @@ class CaseBase:
                     normalizedDistance += temp
             
             if len(bestCases) < k or normalizedDistance < bestCases[-1][1]:
-                # bestCases.insert(0, (caseID, normalizedDistance))
                 bestCases.insert(0, (caseID, normalizedDistance, randint(1,k))) #Ties broken randomly
                 if len(bestCases) > k:
                     bestCases.pop()
-                # bestCases.sort(key = lambda x : x[1])
                 bestCases.sort(key = lambda x : (x[1], x[2]))
         return bestCases
 
@@ -89,8 +86,6 @@ class CaseBase:
             self.cases[caseID] = case
             self.caseBaseSize += 1
     
-    # def alterCase(self, caseID, newFeatureValues)
-
     """
     Case removal feature (e.g., for case base maintenance)
     - caseID = case hash for case to be removed

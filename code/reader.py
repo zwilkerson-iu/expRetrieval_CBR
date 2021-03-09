@@ -92,12 +92,10 @@ class Reader:
             predicates[words[1]] = int(words[0]) - 1
         reader.close()
 
-        # reader = open("data/awa2/predicate-matrix-binary.txt", "r") # binary
-        reader = open("data/awa2/predicate-matrix-continuous.txt", "r") # continuous
+        reader = open("data/awa2/predicate-matrix-continuous.txt", "r")
         lines = reader.readlines()
         train = []
         for line in lines:
-            # words = line.strip().split(" ") # binary
             words = line.strip().split(" ") # continuous
             temp = []
             for value in words:

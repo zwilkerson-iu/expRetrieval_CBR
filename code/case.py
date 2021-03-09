@@ -10,7 +10,7 @@ class Case:
     def __init__(self, featureAttributes:dict, result):
         self.features = {}
         for key, feature in featureAttributes.items():
-            self.features[key] = feature #TODO: check that feature key is in vocabulary
+            self.features[key] = feature
         self.result = result
 
     """
@@ -53,23 +53,6 @@ class Case:
             except KeyError:
                 differenceVector[feature.name] = (feature, None)
         return differenceVector
-
-    #TODO: fix this under new model with result, rather than classification-confidence
-    """
-    Adaptation function for classes TODO: consider broader/domain-specific adaptation rule inclusion
-    - otherClassificationInfo = a tuple containing an alternative classification-confidence pair to be compared
-                                with one that has already been applied
-    """
-    """
-    def adapt(self, otherClassificationInfo):
-        if otherClassificationInfo[0] == self.classification:
-            self.confidence = (self.confidence + otherClassificationInfo[1]) / 2
-        elif otherClassificationInfo[1] > self.confidence:
-            self.classification = otherClassificationInfo[0]
-            self.confidence = otherClassificationInfo[1] - self.confidence
-        else:
-            self.confidence = self.confidence - otherClassificationInfo[1]
-    """
 
     """
     Feature addition to make case implementation more dynamic
