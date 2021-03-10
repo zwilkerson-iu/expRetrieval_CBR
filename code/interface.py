@@ -13,88 +13,42 @@ from deepNetwork import DeepImageNetwork, FeatureNetwork
 import helpers
 
 def run(runningSystem:str):
-    cb = CaseBase()
-
     if runningSystem == "local":
         rootDir = "../../expRetrieval_CBR_data/"
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
-    numIterations = 30
-    partialFeatureValidationMax = 20
-    maxNumEpochs = 100
+    NUMITERATIONS = 30
+    maxNumEpochs = 100 #TODO: revise this
 
     print("Ready for command:")
 
     while True:
         userInput = input().split(" ")
-        #===================================
-        #Import data from file into the case base
-        if userInput[0] == "import":
-            if len(userInput) == 3:
-                for case in Reader().readCSVCases(userInput[1], userInput[2].strip().split(",")):
-                    cb.addCase(case)
-                print("Import was successful")
-            elif len(userInput) == 2:
-                for case in Reader().readCSVCases(userInput[1]):
-                    cb.addCase(case)
-                print("Import was successful")
-            elif len(userInput) == 1:
-                for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-binary.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
-                    cb.addCase(case)
-                print("Import was successful")
-            else:
-                print("Error: incorrect number of arguments")
+        
         #===================================
         #Run tests, considering learned features/weights
-        elif userInput[0] == "matchTest":
-            # print("Running control...")
-            # initialCB = CaseBase()
-            # for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
-            #     initialCB.addCase(case)
-            # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
-            for examplesPerAnimal in [1,5]:
-                images = []
-                if userInput[4] == "0":
-                    images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(10, int(userInput[1])+1, 10):
+        
+        # UserInput key:
+        # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
+        # 1 = % randomness bound [5,50]
+        # 2 = weights used key [0 = False, 1 = True] TODO: implement this
+        if int(userInput[0]) <= 2:
+            for examplesPerAnimal in [10, 20, 50, 100]:
+                for features in [512]:
                     print("==================")
-                    print(str(examplesPerAnimal) + " images used per class")
-                    print(str(features) + " used in the neural network")
-                    if userInput[3] != 'retrain':
-                        if userInput[4] == "1":
-                            images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                        invalidImageExistsFlag = True
-                        while invalidImageExistsFlag:
-                            tf.keras.backend.clear_session()
-                            try:
-                                network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                                resized_images = network.train(np.array(images), np.array(labels), 5)
-                                invalidImageExistsFlag = False
-                            except:
-                                print("invalid image found - resetting seed")
-                                images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                                continue
-                        extractor = tf.keras.Model(inputs=network.model.input,\
-                                                    outputs=network.model.layers[len(network.model.layers)-2].output)
-                        outputs = extractor.predict(resized_images)
-                        testCB = CaseBase()
-                        if userInput[2] == '0':
-                            cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, False)
-                        else:
-                            cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir)
-                        for case in cases:
-                            testCB.addCase(case)
-                        results = helpers.runTests(testCB, numIterations, True, partialFeatureValidationMax)
+                    print(str(examplesPerAnimal) + " cases used per class")
+                    print(str(features) + " used in neural network dense layers")
+                    if int(userInput[0]) == 0 or int(userInput[0]) == 2:
+                        helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), int(userInput[1]))
                     else:
-                        results = helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4], True, partialFeatureValidationMax)
-                    #do anything with reuslts?
+                        helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]))
 
         elif userInput[0] == "epochs":
             _, train, classes = Reader().readAwAForNN()
             results = {}
             for k in range(1, maxNumEpochs+1):
                 results[k] = []
-            for _ in range(numIterations):
+            for _ in range(NUMITERATIONS):
                 for i in range(1, maxNumEpochs+1):
                     network = FeatureNetwork(None, 85, 50)
                     network.train(np.array(train), np.array(list(classes.values())), i)
@@ -107,47 +61,6 @@ def run(runningSystem:str):
                     results[i].append(accuracyCount / 50.0)
             for k in range(1, maxNumEpochs+1):
                 print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
-
-        elif userInput[0] == "removalTest":
-            images = []
-            for examplesPerAnimal in [5]: #WARNING - DO NOT use 1! This does not work
-                if userInput[4] == "0":
-                    images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                for features in range(10, int(userInput[1])+1, 10):
-                    print("==================")
-                    print(str(examplesPerAnimal) + " images used per class")
-                    print(str(features) + " used in the neural network")
-                    if userInput[3] != "retrain":
-                        if userInput[4] == "1":
-                            images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                        invalidImageExistsFlag = True
-                        while invalidImageExistsFlag:
-                            tf.keras.backend.clear_session()
-                            try:
-                                network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
-                                resized_images = network.train(np.array(images), np.array(labels), 5)
-                                invalidImageExistsFlag = False
-                            except:
-                                print("invalid image found - resetting seed")
-                                images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
-                                continue
-                        extractor = tf.keras.Model(inputs=network.model.input,\
-                                                    outputs=network.model.layers[len(network.model.layers)-2].output)
-                        outputs = extractor.predict(resized_images)
-                        testCB = CaseBase()
-                        if userInput[2] == '0':
-                            cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, False, False)
-                        else:
-                            cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, True, False)
-                        for case in cases:
-                            testCB.addCase(case)
-                        if testCB.caseBaseSize != 50 * examplesPerAnimal:
-                            print("Race condition error")
-                            continue
-                        else:
-                            results = helpers.runTests(testCB, numIterations)
-                    else:
-                        helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4])
         
         elif userInput[0] == "weightTest":
             predicates, train, classes = Reader().readAwAForNN()
@@ -206,3 +119,106 @@ if __name__ == "__main__":
         raise(Exception("Error: incorrect number of arguments: " + str(len(sys.argv))))
 
     run(sys.argv[1])
+
+
+#===================================
+        #Import data from file into the case base
+        # if userInput[0] == "import":
+        #     if len(userInput) == 3:
+        #         for case in Reader().readCSVCases(userInput[1], userInput[2].strip().split(",")):
+        #             cb.addCase(case)
+        #         print("Import was successful")
+        #     elif len(userInput) == 2:
+        #         for case in Reader().readCSVCases(userInput[1]):
+        #             cb.addCase(case)
+        #         print("Import was successful")
+        #     elif len(userInput) == 1:
+        #         for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-binary.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
+        #             cb.addCase(case)
+        #         print("Import was successful")
+        #     else:
+        #         print("Error: incorrect number of arguments")
+
+# if userInput[0] == "matchTest":
+#             # print("Running control...")
+#             # initialCB = CaseBase()
+#             # for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
+#             #     initialCB.addCase(case)
+#             # helpers.runTests(initialCB, numIterations, True, partialFeatureValidationMax)
+#             for examplesPerAnimal in [1,5]:
+#                 images = []
+#                 if userInput[4] == "0":
+#                     images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
+#                 for features in range(10, int(userInput[1])+1, 10):
+#                     print("==================")
+#                     print(str(examplesPerAnimal) + " images used per class")
+#                     print(str(features) + " used in the neural network")
+#                     if userInput[3] != 'retrain':
+#                         if userInput[4] == "1":
+#                             images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
+#                         invalidImageExistsFlag = True
+#                         while invalidImageExistsFlag:
+#                             tf.keras.backend.clear_session()
+#                             try:
+#                                 network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
+#                                 resized_images = network.train(np.array(images), np.array(labels), 5)
+#                                 invalidImageExistsFlag = False
+#                             except:
+#                                 print("invalid image found - resetting seed")
+#                                 images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
+#                                 continue
+#                         extractor = tf.keras.Model(inputs=network.model.input,\
+#                                                     outputs=network.model.layers[len(network.model.layers)-2].output)
+#                         outputs = extractor.predict(resized_images)
+#                         testCB = CaseBase()
+#                         if userInput[2] == '0':
+#                             cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, False)
+#                         else:
+#                             cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir)
+#                         for case in cases:
+#                             testCB.addCase(case)
+#                         results = helpers.runTests(testCB, numIterations, True, partialFeatureValidationMax)
+#                     else:
+#                         results = helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4], True, partialFeatureValidationMax)
+#                     #do anything with reuslts?
+
+# elif userInput[0] == "removalTest":
+#             images = []
+#             for examplesPerAnimal in [5]: #WARNING - DO NOT use 1! This does not work
+#                 if userInput[4] == "0":
+#                     images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
+#                 for features in range(10, int(userInput[1])+1, 10):
+#                     print("==================")
+#                     print(str(examplesPerAnimal) + " images used per class")
+#                     print(str(features) + " used in the neural network")
+#                     if userInput[3] != "retrain":
+#                         if userInput[4] == "1":
+#                             images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
+#                         invalidImageExistsFlag = True
+#                         while invalidImageExistsFlag:
+#                             tf.keras.backend.clear_session()
+#                             try:
+#                                 network = DeepImageNetwork(None, (1200, 1200), 50, numFeatures=features)
+#                                 resized_images = network.train(np.array(images), np.array(labels), 5)
+#                                 invalidImageExistsFlag = False
+#                             except:
+#                                 print("invalid image found - resetting seed")
+#                                 images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir)
+#                                 continue
+#                         extractor = tf.keras.Model(inputs=network.model.input,\
+#                                                     outputs=network.model.layers[len(network.model.layers)-2].output)
+#                         outputs = extractor.predict(resized_images)
+#                         testCB = CaseBase()
+#                         if userInput[2] == '0':
+#                             cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, False, False)
+#                         else:
+#                             cases = helpers.generateCaseListWithLearnedFeatures(outputs, examplesPerAnimal, rootDir, True, False)
+#                         for case in cases:
+#                             testCB.addCase(case)
+#                         if testCB.caseBaseSize != 50 * examplesPerAnimal:
+#                             print("Race condition error")
+#                             continue
+#                         else:
+#                             results = helpers.runTests(testCB, numIterations)
+#                     else:
+#                         helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4])

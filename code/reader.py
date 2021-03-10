@@ -8,7 +8,6 @@ class Reader:
     Reads feature and classification information for an initial case base from a CSV file
     - filename = the path for the file to be read (generally used as a relative path from this file's directory)
     - classNames = an optional list of class names to associate with the incoming comma-separated values
-    TODO: potentially consider being able to read class names from CSV columns
     Returns: a list of case objects that can be used to create/add to a case base object
     """
     def readCSVCases(self, filename:str, classNames:list = None, regressionFlag:bool = False):

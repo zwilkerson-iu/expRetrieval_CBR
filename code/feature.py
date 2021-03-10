@@ -35,14 +35,17 @@ class Feature:
         return hash((self.name, self.value, self.weight))
 
     """
-    Weight getter method
+    basic getter methods
     """
     def getWeight(self):
         return self.weight
+    def getValue(self):
+        return self.value
 
     """
-    Weight setter method
-    - weight = the new weight value to assign
+    Setter methods
     """
     def setWeight(self, weight:float):
         self.weight = weight
+    def setValue(self, value):
+        self.value = value

@@ -8,38 +8,49 @@ class DeepImageNetwork:
     - model = optional custom model for more complex tasks later
     - photoDim = tuple containing x, y dimensions of the input photos for the network
     - numOutputs = number of outputs for the network (for AwA2 dataset, this should be 50)
+    - numFeatures = number of features to be trained (i.e., the size of the Dense layers)
     - activation = the activation function for hidden layers
     """
-    def __init__(self, model:tf.keras.Sequential = None, photoDim:tuple = (1, 1), numOutputs:int = 1, numFeatures = 128, activation = "relu"):
+    def __init__(self, model:tf.keras.Sequential = None, photoDim:tuple = (227, 227), numOutputs:int = 50, numFeatures:int = 4096, activation = "relu"):
         if model is not None:
             self.model = model
         else:
-            self.model = tf.keras.Sequential([
-                tf.keras.layers.Flatten(input_shape=(photoDim[0], photoDim[1], 3)),
-                tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-                tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-                tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-                tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-                tf.keras.layers.Dense(numOutputs, use_bias=False)
+            self.model = tf.keras.models.Sequential([
+                tf.keras.layers.Conv2D(filters=96, kernel_size=(11,11), strides=(4,4), activation='relu', input_shape=(227,227,3)),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+                tf.keras.layers.Conv2D(filters=256, kernel_size=(5,5), strides=(1,1), activation='relu', padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+                tf.keras.layers.Conv2D(filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Conv2D(filters=384, kernel_size=(1,1), strides=(1,1), activation='relu', padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Conv2D(filters=256, kernel_size=(1,1), strides=(1,1), activation='relu', padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+                tf.keras.layers.Flatten(),
+                tf.keras.layers.Dense(numFeatures, activation='relu'),
+                tf.keras.layers.Dropout(0.5),
+                tf.keras.layers.Dense(numFeatures, activation='relu'), #TODO: remove bias term???
+                tf.keras.layers.Dropout(0.5),
+                tf.keras.layers.Dense(numOutputs, activation='softmax')
             ])
-
-            self.model.compile(optimizer='adam',
-                    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                    metrics=['accuracy'])
+            self.model.compile(loss='sparse_categorical_crossentropy', 
+                                optimizer=tf.optimizers.SGD(lr=0.001), metrics=['accuracy'])
 
     """
     Network training algorithm
     - train_images = the set of training images for the network
     - train_labels = the set of labels for weight updates during the training process
+    - numFeatures = number of features to be trained (i.e., the size of the Dense layers in the model)
     - numEpochs = the number of training iterations or epochs to perform
     Returns: resized images (in case needed for later testing)
     """
-    def train(self, train_images:np.array, train_labels:np.array, numEpochs:int = 10):
-        resized_images = []
-        print(train_labels)
+    def train(self, train_images:np.array, train_labels:np.array, numFeatures:tuple = (227, 227), numEpochs:int = 20):
+        resized_images = np.empty((len(train_images), numFeatures[0], numFeatures[1], 3))
         for i in range(len(train_images)):
-            resized_images.append(tf.keras.preprocessing.image.smart_resize(train_images[i], (1200,1200)))
-        resized_images = np.array(resized_images)
+            resized_images[i] = tf.image.resize(tf.image.per_image_standardization(train_images[i]), (227,227))
         self.model.fit(resized_images, train_labels, epochs=numEpochs, verbose=1)
         return resized_images
 
@@ -91,3 +102,30 @@ class FeatureNetwork:
     def predict(self, test_list:np.array):
         probability_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
         return probability_model.predict(test_list)
+
+
+    # def __init__(self, model:tf.keras.Sequential = None, photoDim:tuple = (1, 1), numOutputs:int = 1, numFeatures = 128, activation = "relu"):
+    #     if model is not None:
+    #         self.model = model
+    #     else:
+    #         self.model = tf.keras.Sequential([
+    #             tf.keras.layers.Flatten(input_shape=(photoDim[0], photoDim[1], 3)),
+    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
+    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
+    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
+    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
+    #             tf.keras.layers.Dense(numOutputs, use_bias=False)
+    #         ])
+
+    #         self.model.compile(optimizer='adam',
+    #                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    #                 metrics=['accuracy'])
+
+    # def train(self, train_images:np.array, train_labels:np.array, numEpochs:int = 10):
+    #     resized_images = []
+    #     print(train_labels)
+    #     for i in range(len(train_images)):
+    #         resized_images.append(tf.keras.preprocessing.image.smart_resize(train_images[i], (1200,1200)))
+    #     resized_images = np.array(resized_images)
+    #     self.model.fit(resized_images, train_labels, epochs=numEpochs, verbose=1)
+    #     return resized_images

@@ -83,6 +83,15 @@ class Case:
         return returnValue
 
     """
+    Base setter function
+    """
+    def editFeature(self, featureName:str, newValue):
+        try:
+            self.features[featureName].setValue(newValue)
+        except KeyError:
+            return False
+
+    """
     Basic feature removal
     - featureName = the name of the feature to be removed
     Returns the feature to be removed for this case, or False if did not exist
