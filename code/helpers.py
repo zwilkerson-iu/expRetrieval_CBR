@@ -172,7 +172,7 @@ def runTests(numIterations:int, features:int, examplesPerAnimal:int, rootDir:str
     results["stdev"] = std
     print("Average:", ave)
     print("Standard deviation:", std)
-    record = open("../csvFiles/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results.csv", "w")
+    record = open("../results/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results.csv", "w")
     for iteration in results.keys():
         record.write(str(iteration) + "," + str(results[iteration]) + "\n")
     record.close()
