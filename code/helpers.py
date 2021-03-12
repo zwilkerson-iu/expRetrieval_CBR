@@ -103,9 +103,11 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
             for j in range(numImagesPerAnimal):
                 temp = Case({}, (case.result[0], 1.0))
                 for featureName in case.features.keys():
-                    temp.addNewFeature(case.features[featureName])
+                    temp.addNewFeature(Feature(featureName, case.features[featureName].getValue(), case.features[featureName].getWeight()))
                     if randomBound > 0:
-                        r = random.uniform(1.0 - randomBound * 0.01, 1.0 + randomBound * 0.01)
+                        r = float(random.randint(1, randomBound)) #Opt. TODO can make into random.uniform to allow for float randomBound values
+                        if random.randint(0, 1) == 0:
+                            r = 1.0/r
                         temp.editFeature(featureName, temp.getFeature(featureName).getValue() * r)
                 for i in range(len(learnedFeatures[0])):
                     temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
@@ -123,10 +125,14 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
             for j in range(numImagesPerAnimal):
                 temp = Case({}, (case.result[0], 1.0))
                 for featureName in case.features.keys():
-                    temp.addNewFeature(case.features[featureName])
+                    temp.addNewFeature(Feature(featureName, case.features[featureName].getValue(), case.features[featureName].getWeight()))
                     if randomBound > 0:
-                        r = random.uniform(1.0 - randomBound * 0.01, 1.0 + randomBound * 0.01)
-                        temp.editFeature(featureName, temp.getFeature(featureName).getValue() * r) #TODO: somehow this is not persisting...
+                        r = float(random.randint(1, randomBound)) #Opt. TODO can make into random.uniform to allow for float randomBound values
+                        if random.randint(0, 1) == 0:
+                            r = 1.0/r
+                        # r = random.uniform(1.0 - randomBound * 0.01, 1.0 + randomBound * 0.01)
+                        # print(r)
+                        temp.editFeature(featureName, temp.getFeature(featureName).getValue() * r)
                 cases.append(temp)
     else:
         print("ERROR: invalid feature selection mode")

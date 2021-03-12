@@ -18,7 +18,6 @@ def run(runningSystem:str):
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
     NUMITERATIONS = 30
-    maxNumEpochs = 100 #TODO: revise this
 
     print("Ready for command:")
 
@@ -30,37 +29,59 @@ def run(runningSystem:str):
         
         # UserInput key:
         # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
-        # 1 = % randomness bound [5,50]
+        # 1 = randomness bound [1,10]
         # 2 = weights used key [0 = False, 1 = True] TODO: implement this
         if int(userInput[0]) <= 2:
             for examplesPerAnimal in [10, 20, 50, 100]:
-                for features in [512]:
-                    print("==================")
-                    print(str(examplesPerAnimal) + " cases used per class")
-                    print(str(features) + " used in neural network dense layers")
-                    if int(userInput[0]) == 0 or int(userInput[0]) == 2:
-                        helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), int(userInput[1]))
-                    else:
-                        helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]))
+                if userInput[1] != 0:
+                    for randomness in range(1, int(userInput[1])+1):
+                        for features in [512]:
+                            print("==================")
+                            print(str(examplesPerAnimal) + " cases used per class")
+                            print(str(features) + " features used in neural network dense layers")
+                            if int(userInput[0]) == 0 or int(userInput[0]) == 2:
+                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness)
+                            else:
+                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]))
+                else:
+                    for features in [512]:
+                        print("==================")
+                        print(str(examplesPerAnimal) + " cases used per class")
+                        print(str(features) + " features used in neural network dense layers")
+                        if int(userInput[0]) == 0 or int(userInput[0]) == 2:
+                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness)
+                        else:
+                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]))                    
 
-        elif userInput[0] == "epochs":
-            _, train, classes = Reader().readAwAForNN()
+        # UserInput key:
+        # 0 = test key [3 = epochs]
+        # 1 = modal key [0 = expert (weights), 1 = learned (features), 2 = mixed (weights)]
+        # 2 = maximum number of epochs tested [1,100]
+        elif int(userInput[0]) == 3:
+            maxNumEpochs = int(userInput[2])
             results = {}
             for k in range(1, maxNumEpochs+1):
                 results[k] = []
-            for _ in range(NUMITERATIONS):
-                for i in range(1, maxNumEpochs+1):
-                    network = FeatureNetwork(None, 85, 50)
-                    network.train(np.array(train), np.array(list(classes.values())), i)
-                    prediction = network.predict(np.array(train))
-                    accuracyCount = 0
-                    for j in range(50):
-                        if j == np.argmax(prediction[j]):
-                            accuracyCount += 1
-                    print(i, accuracyCount / 50.0)
-                    results[i].append(accuracyCount / 50.0)
-            for k in range(1, maxNumEpochs+1):
-                print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
+            if int(userInput[1]) == 0:
+                _, train, classes = Reader().readAwAForNN()
+                for _ in range(NUMITERATIONS):
+                    for i in range(1, maxNumEpochs+1):
+                        tf.keras.backend.clear_session()
+                        network = FeatureNetwork(None, 85, 50)
+                        network.train(np.array(train), np.array(list(classes.values())), i)
+                        prediction = network.predict(np.array(train))
+                        accuracyCount = 0
+                        for j in range(50):
+                            if j == np.argmax(prediction[j]):
+                                accuracyCount += 1
+                        results[i].append(accuracyCount / 50.0)
+                #TODO: print to results file
+                for k in range(1, maxNumEpochs+1):
+                    print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
+            elif int(userInput[1]) == 1:
+                pass
+            elif int(userInput[1]) == 2:
+                pass
         
         elif userInput[0] == "weightTest":
             predicates, train, classes = Reader().readAwAForNN()
