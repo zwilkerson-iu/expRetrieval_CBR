@@ -60,9 +60,9 @@ def run(runningSystem:str):
         elif int(userInput[0]) == 3:
             maxNumEpochs = int(userInput[2])
             results = {}
-            for k in range(1, maxNumEpochs+1):
-                results[k] = []
             if int(userInput[1]) == 0:
+                for k in range(1, maxNumEpochs+1):
+                    results[k] = []
                 _, train, classes = Reader().readAwAForNN()
                 for _ in range(NUMITERATIONS):
                     for i in range(1, maxNumEpochs+1):
@@ -75,13 +75,58 @@ def run(runningSystem:str):
                             if j == np.argmax(prediction[j]):
                                 accuracyCount += 1
                         results[i].append(accuracyCount / 50.0)
-                #TODO: print to results file
                 for k in range(1, maxNumEpochs+1):
                     print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
             elif int(userInput[1]) == 1:
-                pass
+                for k in range(1, maxNumEpochs+1):
+                    results[k] = ([],[])
+                for _ in range(NUMITERATIONS):
+                    for i in range(1, maxNumEpochs+1):
+                        train_images, train_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
+                        test_images, test_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
+                        invalidImageExistsFlag = True
+                        while invalidImageExistsFlag:
+                            try:
+                                tf.keras.backend.clear_session()
+                                network = DeepImageNetwork(numFeatures=features)
+                                resized_train = network.train(np.array(train_images), np.array(train_labels), numEpochs=i)
+                                resized_test = np.empty((len(test_images), 227, 227, 3))
+                                for i in range(len(test_images)):
+                                    resized_test[i] = tf.image.resize(tf.image.per_image_standardization(test_images[i]), (227,227))
+                                invalidImageExistsFlag = False
+                            except:
+                                print("invalid image found - resetting seed")
+                                train_images, train_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
+                                test_images, test_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
+                                continue
+                        train_pred = network.predict(resized_train)
+                        test_pred = network.predict(resized_test)
+                        accuracyCount = 0
+                        for j in range(len(train_labels)):
+                            if train_labels[j] == np.argmax(train_pred[j]):
+                                accuracyCount += 1
+                        results[i][0].append(accuracyCount / 50.0)
+                        accuracyCount = 0
+                        for j in range(len(test_labels)):
+                            if test_labels[j] == np.argmax(test_pred[j]):
+                                accuracyCount += 1
+                        results[i][1].append(accuracyCount / 50.0)
+                for k in range(1, maxNumEpochs+1):
+                    print(str(k) + "," + str(sum(results[k][0]) / float(len(results[k][0]))) + "," + str(sum(results[k][1]) / float(len(results[k][1]))))
             elif int(userInput[1]) == 2:
                 pass
+            if userInput[1] == 0:
+                record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
+                for iteration in results.keys():
+                    record.write(str(iteration) + "," + ",".join(results[iteration]) + "\n")
+                record.close()
+            else:
+                record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
+                for iteration in results.keys():
+                    record.write(str(iteration) + "," + ",".join(results[iteration][0]) + "\n")
+                    record.write(str(iteration) + "," + ",".join(results[iteration][1]) + "\n")
+                record.close()
+
         
         elif userInput[0] == "weightTest":
             predicates, train, classes = Reader().readAwAForNN()
