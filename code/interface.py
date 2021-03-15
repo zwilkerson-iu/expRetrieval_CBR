@@ -82,22 +82,26 @@ def run(runningSystem:str):
                     results[k] = ([],[])
                 for _ in range(NUMITERATIONS):
                     for i in range(1, maxNumEpochs+1):
-                        train_images, train_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
-                        test_images, test_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
+                        images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
+                        train_images, train_labels = images[:20*50], labels[:20*50]
+                        test_images, test_labels = images[20*50:], labels[20*50:]
+                        print(np.array(train_images).shape)
+                        print(len(train_images))
                         invalidImageExistsFlag = True
                         while invalidImageExistsFlag:
                             try:
                                 tf.keras.backend.clear_session()
-                                network = DeepImageNetwork(numFeatures=features)
+                                network = DeepImageNetwork(numFeatures=4096)
                                 resized_train = network.train(np.array(train_images), np.array(train_labels), numEpochs=i)
                                 resized_test = np.empty((len(test_images), 227, 227, 3))
-                                for i in range(len(test_images)):
-                                    resized_test[i] = tf.image.resize(tf.image.per_image_standardization(test_images[i]), (227,227))
+                                for q in range(len(test_images)):
+                                    resized_test[q] = tf.image.resize(tf.image.per_image_standardization(test_images[q]), (227,227))
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
-                                train_images, train_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
-                                test_images, test_labels = helpers.generateImageSample(20, rootDir, 0, weightsUsed=maxNumEpochs)
+                                images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
+                                train_images, train_labels = images[:20*50], labels[:20*50]
+                                test_images, test_labels = images[20*50:], labels[20*50:]
                                 continue
                         train_pred = network.predict(resized_train)
                         test_pred = network.predict(resized_test)

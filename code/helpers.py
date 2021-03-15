@@ -82,7 +82,7 @@ def generateImageSample(numImagesPerAnimal:int, rootDir:str, k:int, featureSelec
         imageFiles = os.listdir(rootDir + "awa2/JPEGImages/" + animal)
         imageTemps = random.sample(imageFiles, numImagesPerAnimal)
         imageRecord[animal] = imageTemps
-        print(animal + "," + ",".join(x for x in imageTemps))
+        #print(animal + "," + ",".join(x for x in imageTemps))
         for f in range(len(imageTemps)):
             temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + imageTemps[f], as_gray = False)
             images.append(temp)
