@@ -33,25 +33,25 @@ def run(runningSystem:str):
         # 2 = weights used key [0 = False, 1 = True] TODO: implement this
         if int(userInput[0]) <= 2:
             for examplesPerAnimal in [10, 20, 50, 100]:
-                if userInput[1] != 0:
+                if int(userInput[1]) != 0:
                     for randomness in range(1, int(userInput[1])+1):
                         for features in [512]:
                             print("==================")
                             print(str(examplesPerAnimal) + " cases used per class")
                             print(str(features) + " features used in neural network dense layers")
                             if int(userInput[0]) == 0 or int(userInput[0]) == 2:
-                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness)
+                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
                             else:
-                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]))
+                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
                 else:
                     for features in [512]:
                         print("==================")
                         print(str(examplesPerAnimal) + " cases used per class")
                         print(str(features) + " features used in neural network dense layers")
                         if int(userInput[0]) == 0 or int(userInput[0]) == 2:
-                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness)
+                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
                         else:
-                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]))                    
+                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))                    
 
         # UserInput key:
         # 0 = test key [3 = epochs]
@@ -119,6 +119,7 @@ def run(runningSystem:str):
                     print(str(k) + "," + str(sum(results[k][0]) / float(len(results[k][0]))) + "," + str(sum(results[k][1]) / float(len(results[k][1]))))
             elif int(userInput[1]) == 2:
                 pass
+            #TODO: implement
             if userInput[1] == 0:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
                 for iteration in results.keys():

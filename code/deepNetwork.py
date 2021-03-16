@@ -32,9 +32,9 @@ class DeepImageNetwork:
                 tf.keras.layers.Flatten(),
                 tf.keras.layers.Dense(numFeatures, activation='relu'),
                 tf.keras.layers.Dropout(0.5),
-                tf.keras.layers.Dense(numFeatures, activation='relu'), #TODO: remove bias term???
+                tf.keras.layers.Dense(numFeatures, activation='relu'),
                 tf.keras.layers.Dropout(0.5),
-                tf.keras.layers.Dense(numOutputs, activation='softmax')
+                tf.keras.layers.Dense(numOutputs, activation='softmax', use_bias=False)
             ])
             self.model.compile(loss='sparse_categorical_crossentropy', 
                                 optimizer=tf.optimizers.SGD(lr=0.001), metrics=['accuracy'])

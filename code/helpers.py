@@ -2,7 +2,7 @@ from case_base import CaseBase
 from case import Case
 from reader import Reader
 from feature import Feature
-from deepNetwork import DeepImageNetwork
+from deepNetwork import DeepImageNetwork, FeatureNetwork
 
 from skimage.io import imread
 import numpy as np
@@ -163,6 +163,89 @@ def runTests(numIterations:int, features:int, examplesPerAnimal:int, rootDir:str
         cb = CaseBase()
         for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomBound):
             cb.addCase(case)
+
+        if weightsUsed == 1:
+            _, _, classes = Reader().readAwAForNN()
+            if featureSelectionMode == 0:
+                featureSet = np.empty((cb.caseBaseSize, 85))
+                labels = np.empty(cb.caseBaseSize)
+                keys = tuple(cb.cases.keys())
+                for c in range(len(keys)):
+                    features = tuple(cb.cases[keys[c]].features.keys())
+                    for f in range(len(features)):
+                        featureSet[c][f] = cb.cases[keys[c]].features[features[f]].value
+                    labels[c] = classes[cb.cases[keys[c]].result[0]]
+                weighter = FeatureNetwork(None, 85, 50)
+                weighter.train(featureSet, labels, 20) #TODO: set this based on epochs testing
+                for c in range(len(keys)):
+                    features = tuple(cb.cases[keys[c]].features.keys())
+                    absoluteMax = 0.0
+                    for f in range(len(features)):
+                        newWeights = weighter.model.trainable_weights[0].numpy()[f]
+                        weight = abs(newWeights[classes[cb.cases[keys[c]].result[0]]])
+                        if weight > absoluteMax:
+                            absoluteMax = weight
+                        cb.cases[keys[c]].features[features[f]].setWeight(weight)
+                    for featureName in features:
+                        cb.cases[keys[c]].features[featureName].setWeight(cb.cases[keys[c]].features[featureName].getWeight() / absoluteMax)
+
+            elif featureSelectionMode == 1:
+                newWeights = network.model.trainable_weights[-1].numpy()
+                for caseHash in cb.cases.keys():
+                    absoluteMax = 0.0
+                    for featureName in cb.cases[caseHash].features.keys():
+                        weightSet = newWeights[int(featureName[7:])]
+                        weight = abs(weightSet[classes[cb.cases[caseHash].result[0]]])
+                        if weight > absoluteMax:
+                            absoluteMax = weight
+                        cb.cases[caseHash].features[featureName].setWeight(weight)
+                    for featureName in cb.cases[caseHash].features.keys():
+                        cb.cases[caseHash].features[featureName].setWeight(cb.cases[caseHash].features[featureName].getWeight() / absoluteMax)
+
+#       elif userInput[0] == "weightTest":
+        #    predicates, train, classes = Reader().readAwAForNN()
+        #         results = {}
+        #         for j in range(1, 101):
+        #             results[j/100.0] = []
+        #         for k in range(30):
+        #             for i in range(1, 41):
+        #                 testCB = CaseBase()
+        #                 # for case in Reader().readAwADataFromTxt("data/awa2/predicate-matrix-binary.txt", "data/awa2/classes.txt", "data/awa2/predicates.txt"):
+        #                 for case in Reader().readAwADataFromTxt("data/awa2/predicate-matrix-continuous.txt", "data/awa2/classes.txt", "data/awa2/predicates.txt"):
+        #                     testCB.addCase(case)
+        #                 # print("before", testCB.cases[list(testCB.cases.keys())[0]].features)
+        #                 initial = datasetTests.partialFeatureValidation(testCB, 1000, i/100.0)
+        #                 network = FeatureNetwork(None, 85, 50)
+        #                 network.train(np.array(train), np.array(list(classes.values())), 80)
+        #                 if i % 10 > 7:
+        #                     print(i, network.model.trainable_weights[0].numpy()[0]) #RELU as proper activation function?
+        #                 for case in testCB.cases.keys():
+        #                     absoluteMax = 0.0
+        #                     for feature in testCB.cases[case].features.keys():
+        #                         newWeights = network.model.trainable_weights[0].numpy()[predicates[feature]]
+        #                         weight = abs(newWeights[classes[testCB.cases[case].result[0]]])
+        #                         if weight > absoluteMax:
+        #                             absoluteMax = weight
+        #                         testCB.cases[case].features[feature].setWeight(weight) #TODO: account for regression
+        #                     for feature in testCB.cases[case].features.keys():
+        #                         featureObject = testCB.cases[case].features[feature]
+        #                         featureObject.setWeight(featureObject.getWeight() / absoluteMax)
+        #                 # print("after", testCB.cases[list(testCB.cases.keys())[0]].features)
+        #                 final = datasetTests.partialFeatureValidation(testCB, 1000, i/100.0)
+        #                 results[i/100.0].append((initial, final))
+        #                 print(i)
+        #             print("finished iteration", k)
+        #         for key in results.keys():
+        #             avgInit = 0.0
+        #             avgFinal = 0.0
+        #             for init, final in results[key]:
+        #                 avgInit += init
+        #                 avgFinal += final
+        #             if len(results[key]) != 0:
+        #                 print(str(key) + "," + str(avgInit / len(results[key])) + "," + str(avgFinal / len(results[key])))
+
+
+
         results[k] = duplicatedFeatureValidation(cb, 1000)
         print(str(k) + "," + str(results[k]))
 
