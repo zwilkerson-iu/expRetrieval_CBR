@@ -63,7 +63,7 @@ def run(runningSystem:str):
             if int(userInput[1]) == 0:
                 for k in range(1, maxNumEpochs+1):
                     results[k] = []
-                _, train, classes = Reader().readAwAForNN()
+                _, train, classes = Reader().readAwAForNN(rootDir)
                 for _ in range(NUMITERATIONS):
                     for i in range(1, maxNumEpochs+1):
                         tf.keras.backend.clear_session()

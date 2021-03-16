@@ -80,9 +80,10 @@ class Reader:
         return retVal
     """
     Reads feature data from the AwA dataset for neural network training to generate feature weights
+    - rootDir = root directory of the system (testing parameter)
     Returns: predicate translation dictionary, feature training data, class translation dictionary (values used as classes for training)
     """
-    def readAwAForNN(self):
+    def readAwAForNN(self, rootDir:str):
         reader = open("data/awa2/predicates.txt", "r")
         lines = reader.readlines()
         predicates = {}
