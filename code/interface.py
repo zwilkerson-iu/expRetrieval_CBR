@@ -123,18 +123,18 @@ def run(runningSystem:str):
             if int(userInput[1]) == 0:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
                 for iteration in results.keys():
-                    record.write(str(iteration) + "," + ",".join(results[iteration]) + "\n")
+                    record.write(str(iteration) + "," + ",".join(str(results[iteration])) + "\n")
                 record.close()
             else:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
                 for iteration in results.keys():
-                    record.write(str(iteration) + "," + ",".join(results[iteration][0]) + "\n")
-                    record.write(str(iteration) + "," + ",".join(results[iteration][1]) + "\n")
+                    record.write(str(iteration) + "," + ",".join(str(results[iteration][0])) + "\n")
+                    record.write(str(iteration) + "," + ",".join(str(results[iteration][1])) + "\n")
                 record.close()
 
         
-        elif userInput[0] == "weightTest":
-            predicates, train, classes = Reader().readAwAForNN()
+        # elif userInput[0] == "weightTest":
+        #     predicates, train, classes = Reader().readAwAForNN()
         #         results = {}
         #         for j in range(1, 101):
         #             results[j/100.0] = []
