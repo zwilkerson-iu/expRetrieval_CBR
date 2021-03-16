@@ -84,7 +84,7 @@ class Reader:
     Returns: predicate translation dictionary, feature training data, class translation dictionary (values used as classes for training)
     """
     def readAwAForNN(self, rootDir:str):
-        reader = open(rootDir + "data/awa2/predicates.txt", "r")
+        reader = open(rootDir + "awa2/predicates.txt", "r")
         lines = reader.readlines()
         predicates = {}
         for line in lines:
@@ -92,7 +92,7 @@ class Reader:
             predicates[words[1]] = int(words[0]) - 1
         reader.close()
 
-        reader = open(rootDir + "data/awa2/predicate-matrix-continuous.txt", "r")
+        reader = open(rootDir + "awa2/predicate-matrix-continuous.txt", "r")
         lines = reader.readlines()
         train = []
         for line in lines:
@@ -104,7 +104,7 @@ class Reader:
             train.append(np.array(temp))
         reader.close()
 
-        reader = open(rootDir + "data/awa2/classes.txt", "r")
+        reader = open(rootDir + "awa2/classes.txt", "r")
         lines = reader.readlines()
         classes = {}
         for line in lines:
