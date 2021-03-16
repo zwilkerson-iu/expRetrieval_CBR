@@ -120,7 +120,7 @@ def run(runningSystem:str):
             elif int(userInput[1]) == 2:
                 pass
             #TODO: implement
-            if userInput[1] == 0:
+            if int(userInput[1]) == 0:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
                 for iteration in results.keys():
                     record.write(str(iteration) + "," + ",".join(results[iteration]) + "\n")
