@@ -25,13 +25,19 @@ def run(runningSystem:str):
         userInput = input().split(" ")
         
         #===================================
+        #exit the program
+        if userInput[0] == "q":
+            print("Terminating program")
+            break
+
+        #===================================
         #Run tests, considering learned features/weights
         
         # UserInput key:
         # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
         # 1 = randomness bound [1,10]
         # 2 = weights used key [0 = False, 1 = True] TODO: implement this
-        if int(userInput[0]) <= 2:
+        elif int(userInput[0]) <= 2:
             for examplesPerAnimal in [10, 20, 50, 100]:
                 if int(userInput[1]) != 0:
                     for randomness in range(1, int(userInput[1])+1):
@@ -119,7 +125,7 @@ def run(runningSystem:str):
                     print(str(k) + "," + str(sum(results[k][0]) / float(len(results[k][0]))) + "," + str(sum(results[k][1]) / float(len(results[k][1]))))
             elif int(userInput[1]) == 2:
                 pass
-            #TODO: implement
+                #TODO: implement
             if int(userInput[1]) == 0:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
                 for iteration in results.keys():
@@ -175,12 +181,6 @@ def run(runningSystem:str):
         #             if len(results[key]) != 0:
         #                 print(str(key) + "," + str(avgInit / len(results[key])) + "," + str(avgFinal / len(results[key])))
 
-
-        #===================================
-        #exit the program
-        elif userInput[0] == "q":
-            print("Terminating program")
-            break
         #===================================
         else:
             print("Error: unknown command")
