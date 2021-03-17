@@ -87,7 +87,7 @@ def run(runningSystem:str):
                 for k in range(1, maxNumEpochs+1):
                     results[k] = ([],[])
                 for _ in range(NUMITERATIONS):
-                    for i in range(1, maxNumEpochs+1):
+                    for i in range(1, maxNumEpochs+1, 3):
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                         train_images, train_labels = images[:20*50], labels[:20*50]
                         test_images, test_labels = images[20*50:], labels[20*50:]
