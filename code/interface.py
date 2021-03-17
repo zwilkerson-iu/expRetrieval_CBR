@@ -87,7 +87,7 @@ def run(runningSystem:str):
                 for k in range(1, maxNumEpochs+1):
                     results[k] = ([],[])
                 for _ in range(NUMITERATIONS):
-                    for i in range(1, maxNumEpochs+1, 3):
+                    for i in range(10, maxNumEpochs+1, 10):
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                         train_images, train_labels = images[:20*50], labels[:20*50]
                         test_images, test_labels = images[20*50:], labels[20*50:]
@@ -97,7 +97,7 @@ def run(runningSystem:str):
                         while invalidImageExistsFlag:
                             try:
                                 tf.keras.backend.clear_session()
-                                network = DeepImageNetwork(numFeatures=4096)
+                                network = DeepImageNetwork(numFeatures=1024)
                                 resized_train = network.train(np.array(train_images), np.array(train_labels), numEpochs=i)
                                 resized_test = np.empty((len(test_images), 227, 227, 3))
                                 for q in range(len(test_images)):
