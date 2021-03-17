@@ -91,8 +91,6 @@ def run(runningSystem:str):
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                         train_images, train_labels = images[:20*50], labels[:20*50]
                         test_images, test_labels = images[20*50:], labels[20*50:]
-                        print(np.array(train_images).shape)
-                        print(len(train_images))
                         invalidImageExistsFlag = True
                         while invalidImageExistsFlag:
                             try:
@@ -110,7 +108,11 @@ def run(runningSystem:str):
                                 test_images, test_labels = images[20*50:], labels[20*50:]
                                 continue
                         train_pred = network.predict(resized_train)
+                        print(train_pred.shape)
+                        print(train_pred[0])
                         test_pred = network.predict(resized_test)
+                        print(test_pred.shape)
+                        print(test_pred[0])
                         accuracyCount = 0
                         for j in range(len(train_labels)):
                             if train_labels[j] == np.argmax(train_pred[j]):
