@@ -84,10 +84,10 @@ def run(runningSystem:str):
                 for k in range(1, maxNumEpochs+1):
                     print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
             elif int(userInput[1]) == 1:
-                for k in range(1, maxNumEpochs+1):
+                for k in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
                     results[k] = ([],[])
                 for _ in range(NUMITERATIONS):
-                    for i in range(10, maxNumEpochs+1, 10):
+                    for i in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                         train_images, train_labels = images[:20*50], labels[:20*50]
                         test_images, test_labels = images[20*50:], labels[20*50:]
@@ -115,13 +115,15 @@ def run(runningSystem:str):
                         for j in range(len(train_labels)):
                             if train_labels[j] == np.argmax(train_pred[j]):
                                 accuracyCount += 1
-                        results[i][0].append(accuracyCount / 50.0)
+                        results[i][0].append(accuracyCount / (20*50.0))
+                        print(accuracyCount / (20*50.0))
                         accuracyCount = 0
                         for j in range(len(test_labels)):
                             if test_labels[j] == np.argmax(test_pred[j]):
                                 accuracyCount += 1
-                        results[i][1].append(accuracyCount / 50.0)
-                for k in range(1, maxNumEpochs+1):
+                        results[i][1].append(accuracyCount / (20*50.0))
+                        print(accuracyCount / (20*50.0))
+                for k in results.keys():
                     print(str(k) + "," + str(sum(results[k][0]) / float(len(results[k][0]))) + "," + str(sum(results[k][1]) / float(len(results[k][1]))))
             elif int(userInput[1]) == 2:
                 pass

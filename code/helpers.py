@@ -165,7 +165,7 @@ def runTests(numIterations:int, features:int, examplesPerAnimal:int, rootDir:str
             cb.addCase(case)
 
         if weightsUsed == 1:
-            _, _, classes = Reader().readAwAForNN()
+            _, _, classes = Reader().readAwAForNN(rootDir)
             if featureSelectionMode == 0:
                 featureSet = np.empty((cb.caseBaseSize, 85))
                 labels = np.empty(cb.caseBaseSize)
