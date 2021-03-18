@@ -17,7 +17,7 @@ def run(runningSystem:str):
         rootDir = "../../expRetrieval_CBR_data/"
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
-    NUMITERATIONS = 1
+    NUMITERATIONS = 5
 
     print("Ready for command:")
 
@@ -106,7 +106,7 @@ def run(runningSystem:str):
                     results[k] = ([],[])
                 for m in range(iterStart, iterStart+NUMITERATIONS):
                     for i in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
-                        images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
+                        images, labels = helpers.generateImageSample(40, rootDir, m, weightsUsed=maxNumEpochs)
                         train_images, train_labels, test_images, test_labels = [], [], [], []
                         for index in range(len(labels)):
                             if index % 40 < 20:
@@ -119,16 +119,16 @@ def run(runningSystem:str):
                         while invalidImageExistsFlag:
                             try:
                                 tf.keras.backend.clear_session()
-                                network = DeepImageNetwork(numFeatures=1024)
-                                resized_train = network.train(np.array(train_images), np.array(train_labels), numEpochs=i)
                                 resized_test = np.empty((len(test_images), 227, 227, 3))
                                 for q in range(len(test_images)):
                                     resized_test[q] = tf.image.resize(tf.image.per_image_standardization(test_images[q]), (227,227))
+                                network = DeepImageNetwork(numFeatures=1024)
+                                resized_train = network.train(np.array(train_images), np.array(train_labels), numEpochs=i)
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
                                 print(len(train_images), len(train_labels), len(test_images), len(test_labels))
-                                images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
+                                images, labels = helpers.generateImageSample(40, rootDir, m, weightsUsed=maxNumEpochs)
                                 train_images, train_labels, test_images, test_labels = [], [], [], []
                                 for index in range(len(labels)):
                                     if index % 40 < 20:
@@ -165,13 +165,13 @@ def run(runningSystem:str):
             if int(userInput[1]) == 0:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + str(m) + "_results.csv", "w")
                 for iteration in results.keys():
-                    record.write(str(iteration) + "," + ",".join(str(results[iteration])) + "\n")
+                    record.write(str(iteration) + "," + ",".join(map(str, results[iteration])) + "\n")
                 record.close()
             else:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + str(m) + "_results.csv", "w")
                 for iteration in results.keys():
-                    record.write(str(iteration) + "," + ",".join(str(results[iteration][0])) + "\n")
-                    record.write(str(iteration) + "," + ",".join(str(results[iteration][1])) + "\n")
+                    record.write(str(iteration) + "," + ",".join(map(str, results[iteration][0])) + "\n")
+                    record.write(str(iteration) + "," + ",".join(map(str, results[iteration][1])) + "\n")
                 record.close()
 
         
