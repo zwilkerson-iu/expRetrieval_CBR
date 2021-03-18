@@ -89,8 +89,14 @@ def run(runningSystem:str):
                 for _ in range(NUMITERATIONS):
                     for i in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
-                        train_images, train_labels = images[:20*50], labels[:20*50]
-                        test_images, test_labels = images[20*50:], labels[20*50:]
+                        train_images, train_labels, test_images, test_labels = [], [], [], []
+                        for index in range(len(labels)):
+                            if index % 50 < 20:
+                                test_images.append(images[index])
+                                test_labels.append(labels[index])
+                            else:
+                                train_images.append(images[index])
+                                train_images.append(labels[index])
                         invalidImageExistsFlag = True
                         while invalidImageExistsFlag:
                             try:
@@ -103,9 +109,14 @@ def run(runningSystem:str):
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
-                                images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
-                                train_images, train_labels = images[:20*50], labels[:20*50]
-                                test_images, test_labels = images[20*50:], labels[20*50:]
+                                train_images, train_labels, test_images, test_labels = [], [], [], []
+                                for index in range(len(labels)):
+                                    if index % 50 < 20:
+                                        test_images.append(images[index])
+                                        test_labels.append(labels[index])
+                                    else:
+                                        train_images.append(images[index])
+                                        train_images.append(labels[index])
                                 continue
                         train_pred = network.predict(resized_train)
                         print(train_pred.shape)
@@ -120,6 +131,7 @@ def run(runningSystem:str):
                         results[i][0].append(accuracyCount / (20*50.0))
                         print(accuracyCount / (20*50.0))
                         accuracyCount = 0
+                        print(test_labels)
                         for j in range(len(test_labels)):
                             if test_labels[j] == np.argmax(test_pred[j]):
                                 accuracyCount += 1
