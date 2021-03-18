@@ -136,7 +136,7 @@ def run(runningSystem:str):
                                         test_labels.append(labels[index])
                                     else:
                                         train_images.append(images[index])
-                                        train_images.append(labels[index])
+                                        train_labels.append(labels[index])
                                 continue
                         train_pred = network.predict(resized_train)
                         # print(train_pred.shape)
