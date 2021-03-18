@@ -17,7 +17,7 @@ def run(runningSystem:str):
         rootDir = "../../expRetrieval_CBR_data/"
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
-    NUMITERATIONS = 2
+    NUMITERATIONS = 1
 
     print("Ready for command:")
 
@@ -32,6 +32,8 @@ def run(runningSystem:str):
 
         #===================================
         #Run tests, considering learned features/weights
+
+        #TODO: setup case where optional userInpt[3] such that the k values for iterations are on (userInout[3], userInput[3]+NUMITERATIONS)
         
         # UserInput key:
         # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
@@ -46,31 +48,47 @@ def run(runningSystem:str):
                             print(str(examplesPerAnimal) + " cases used per class")
                             print(str(features) + " features used in neural network dense layers")
                             if int(userInput[0]) == 0 or int(userInput[0]) == 2:
-                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
+                                try:
+                                    helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
+                                except:
+                                    helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
                             else:
-                                helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
+                                try:
+                                    helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
+                                except:
+                                    helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
                 else:
                     for features in [512]:
                         print("==================")
                         print(str(examplesPerAnimal) + " cases used per class")
                         print(str(features) + " features used in neural network dense layers")
                         if int(userInput[0]) == 0 or int(userInput[0]) == 2:
-                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
+                            try:
+                                helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
+                            except:
+                                helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
                         else:
-                            helpers.runTests(NUMITERATIONS, features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))                    
+                            try:
+                                helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
+                            except:
+                                helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))                 
 
         # UserInput key:
         # 0 = test key [3 = epochs]
         # 1 = modal key [0 = expert (weights), 1 = learned (features), 2 = mixed (weights)]
         # 2 = maximum number of epochs tested [1,100]
         elif int(userInput[0]) == 3:
+            try:
+                iterStart = int(userInput[3])
+            except:
+                iterStart = 0
             maxNumEpochs = int(userInput[2])
             results = {}
             if int(userInput[1]) == 0:
                 for k in range(1, maxNumEpochs+1):
                     results[k] = []
                 _, train, classes = Reader().readAwAForNN(rootDir)
-                for _ in range(NUMITERATIONS):
+                for m in range(iterStart, iterStart+NUMITERATIONS):
                     for i in range(1, maxNumEpochs+1):
                         tf.keras.backend.clear_session()
                         network = FeatureNetwork(None, 85, 50)
@@ -86,7 +104,7 @@ def run(runningSystem:str):
             elif int(userInput[1]) == 1:
                 for k in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
                     results[k] = ([],[])
-                for _ in range(NUMITERATIONS):
+                for m in range(iterStart, iterStart+NUMITERATIONS):
                     for i in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                         train_images, train_labels, test_images, test_labels = [], [], [], []
@@ -145,12 +163,12 @@ def run(runningSystem:str):
                 pass
                 #TODO: implement
             if int(userInput[1]) == 0:
-                record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
+                record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + str(m) + "_results.csv", "w")
                 for iteration in results.keys():
                     record.write(str(iteration) + "," + ",".join(str(results[iteration])) + "\n")
                 record.close()
             else:
-                record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + "_results.csv", "w")
+                record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + str(m) + "_results.csv", "w")
                 for iteration in results.keys():
                     record.write(str(iteration) + "," + ",".join(str(results[iteration][0])) + "\n")
                     record.write(str(iteration) + "," + ",".join(str(results[iteration][1])) + "\n")
