@@ -109,6 +109,7 @@ def run(runningSystem:str):
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
+                                images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                                 train_images, train_labels, test_images, test_labels = [], [], [], []
                                 for index in range(len(labels)):
                                     if index % 40 < 20:
@@ -119,11 +120,11 @@ def run(runningSystem:str):
                                         train_images.append(labels[index])
                                 continue
                         train_pred = network.predict(resized_train)
-                        print(train_pred.shape)
-                        print(train_pred[0])
+                        # print(train_pred.shape)
+                        # print(train_pred[0])
                         test_pred = network.predict(resized_test)
-                        print(test_pred.shape)
-                        print(test_pred[0])
+                        # print(test_pred.shape)
+                        # print(test_pred[0])
                         accuracyCount = 0
                         for j in range(len(train_labels)):
                             if train_labels[j] == np.argmax(train_pred[j]):
@@ -131,7 +132,7 @@ def run(runningSystem:str):
                         results[i][0].append(accuracyCount / (20*50.0))
                         print(accuracyCount / (20*50.0))
                         accuracyCount = 0
-                        print(test_labels)
+                        # print(test_labels)
                         for j in range(len(test_labels)):
                             if test_labels[j] == np.argmax(test_pred[j]):
                                 accuracyCount += 1
