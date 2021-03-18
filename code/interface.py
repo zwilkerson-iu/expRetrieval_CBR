@@ -17,7 +17,7 @@ def run(runningSystem:str):
         rootDir = "../../expRetrieval_CBR_data/"
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
-    NUMITERATIONS = 2
+    NUMITERATIONS = 5
 
     print("Ready for command:")
 
