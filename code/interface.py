@@ -17,7 +17,7 @@ def run(runningSystem:str):
         rootDir = "../../expRetrieval_CBR_data/"
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
-    NUMITERATIONS = 5
+    NUMITERATIONS = 2
 
     print("Ready for command:")
 
@@ -109,6 +109,7 @@ def run(runningSystem:str):
                                 invalidImageExistsFlag = False
                             except:
                                 print("invalid image found - resetting seed")
+                                print(len(train_images), len(train_labels), len(test_images), len(test_labels))
                                 images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                                 train_images, train_labels, test_images, test_labels = [], [], [], []
                                 for index in range(len(labels)):
