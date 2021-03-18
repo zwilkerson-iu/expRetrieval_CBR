@@ -91,7 +91,7 @@ def run(runningSystem:str):
                         images, labels = helpers.generateImageSample(40, rootDir, 0, weightsUsed=maxNumEpochs)
                         train_images, train_labels, test_images, test_labels = [], [], [], []
                         for index in range(len(labels)):
-                            if index % 50 < 20:
+                            if index % 40 < 20:
                                 test_images.append(images[index])
                                 test_labels.append(labels[index])
                             else:
@@ -111,7 +111,7 @@ def run(runningSystem:str):
                                 print("invalid image found - resetting seed")
                                 train_images, train_labels, test_images, test_labels = [], [], [], []
                                 for index in range(len(labels)):
-                                    if index % 50 < 20:
+                                    if index % 40 < 20:
                                         test_images.append(images[index])
                                         test_labels.append(labels[index])
                                     else:
