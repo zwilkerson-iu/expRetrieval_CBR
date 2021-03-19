@@ -32,18 +32,16 @@ def run(runningSystem:str):
 
         #===================================
         #Run tests, considering learned features/weights
-
-        #TODO: setup case where optional userInpt[3] such that the k values for iterations are on (userInout[3], userInput[3]+NUMITERATIONS)
         
         # UserInput key:
         # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
         # 1 = randomness bound [1,10]
         # 2 = weights used key [0 = False, 1 = True] TODO: implement this
         elif int(userInput[0]) <= 2:
-            for examplesPerAnimal in [10, 20, 50, 100]:
+            for examplesPerAnimal in [10, 20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
                 if int(userInput[1]) != 0:
                     for randomness in range(1, int(userInput[1])+1):
-                        for features in [512]:
+                        for features in [1024]:
                             print("==================")
                             print(str(examplesPerAnimal) + " cases used per class")
                             print(str(features) + " features used in neural network dense layers")
@@ -62,16 +60,10 @@ def run(runningSystem:str):
                         print("==================")
                         print(str(examplesPerAnimal) + " cases used per class")
                         print(str(features) + " features used in neural network dense layers")
-                        if int(userInput[0]) == 0 or int(userInput[0]) == 2:
-                            try:
-                                helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
-                            except:
-                                helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
-                        else:
-                            try:
-                                helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
-                            except:
-                                helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))                 
+                        try:
+                            helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
+                        except:
+                            helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))             
 
         # UserInput key:
         # 0 = test key [3 = epochs]

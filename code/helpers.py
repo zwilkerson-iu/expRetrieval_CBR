@@ -142,7 +142,7 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
 def runTests(numIterations:int, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed = 0):
     results = {}
     outputs = None
-    for k in range(numIterations):
+    for k in range(numIterations[0], numIterations[1]):
         if featureSelectionMode == 1 or featureSelectionMode == 2: #All learned, or mixed
             images, labels = generateImageSample(examplesPerAnimal, rootDir, k, featureSelectionMode, randomBound, weightsUsed)
             invalidImageExistsFlag = True
