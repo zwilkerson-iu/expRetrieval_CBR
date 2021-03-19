@@ -56,7 +56,7 @@ def run(runningSystem:str):
                                 except:
                                     helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
                 else:
-                    for features in [512]:
+                    for features in [1024]:
                         print("==================")
                         print(str(examplesPerAnimal) + " cases used per class")
                         print(str(features) + " features used in neural network dense layers")
