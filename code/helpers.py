@@ -176,7 +176,7 @@ def runTests(numIterations:int, features:int, examplesPerAnimal:int, rootDir:str
                         featureSet[c][f] = cb.cases[keys[c]].features[features[f]].value
                     labels[c] = classes[cb.cases[keys[c]].result[0]]
                 weighter = FeatureNetwork(None, 85, 50)
-                weighter.train(featureSet, labels, 20) #TODO: set this based on epochs testing
+                weighter.train(featureSet, labels, 80) #TODO: set this based on epochs testing
                 for c in range(len(keys)):
                     features = tuple(cb.cases[keys[c]].features.keys())
                     absoluteMax = 0.0

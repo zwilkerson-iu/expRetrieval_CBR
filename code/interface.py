@@ -37,6 +37,7 @@ def run(runningSystem:str):
         # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
         # 1 = randomness bound [1,10]
         # 2 = weights used key [0 = False, 1 = True] TODO: implement this
+        # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) <= 2:
             for examplesPerAnimal in [10, 20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
                 if int(userInput[1]) != 0:
@@ -69,6 +70,7 @@ def run(runningSystem:str):
         # 0 = test key [3 = epochs]
         # 1 = modal key [0 = expert (weights), 1 = learned (features), 2 = mixed (weights)]
         # 2 = maximum number of epochs tested [1,100]
+        # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) == 3:
             try:
                 iterStart = int(userInput[3])
@@ -166,48 +168,93 @@ def run(runningSystem:str):
                     record.write(str(iteration) + "," + ",".join(map(str, results[iteration][1])) + "\n")
                 record.close()
 
-        
-        # elif userInput[0] == "weightTest":
-        #     predicates, train, classes = Reader().readAwAForNN()
-        #         results = {}
-        #         for j in range(1, 101):
-        #             results[j/100.0] = []
-        #         for k in range(30):
-        #             for i in range(1, 41):
-        #                 testCB = CaseBase()
-        #                 # for case in Reader().readAwADataFromTxt("data/awa2/predicate-matrix-binary.txt", "data/awa2/classes.txt", "data/awa2/predicates.txt"):
-        #                 for case in Reader().readAwADataFromTxt("data/awa2/predicate-matrix-continuous.txt", "data/awa2/classes.txt", "data/awa2/predicates.txt"):
-        #                     testCB.addCase(case)
-        #                 # print("before", testCB.cases[list(testCB.cases.keys())[0]].features)
-        #                 initial = datasetTests.partialFeatureValidation(testCB, 1000, i/100.0)
-        #                 network = FeatureNetwork(None, 85, 50)
-        #                 network.train(np.array(train), np.array(list(classes.values())), 80)
-        #                 if i % 10 > 7:
-        #                     print(i, network.model.trainable_weights[0].numpy()[0]) #RELU as proper activation function?
-        #                 for case in testCB.cases.keys():
-        #                     absoluteMax = 0.0
-        #                     for feature in testCB.cases[case].features.keys():
-        #                         newWeights = network.model.trainable_weights[0].numpy()[predicates[feature]]
-        #                         weight = abs(newWeights[classes[testCB.cases[case].result[0]]])
-        #                         if weight > absoluteMax:
-        #                             absoluteMax = weight
-        #                         testCB.cases[case].features[feature].setWeight(weight) #TODO: account for regression
-        #                     for feature in testCB.cases[case].features.keys():
-        #                         featureObject = testCB.cases[case].features[feature]
-        #                         featureObject.setWeight(featureObject.getWeight() / absoluteMax)
-        #                 # print("after", testCB.cases[list(testCB.cases.keys())[0]].features)
-        #                 final = datasetTests.partialFeatureValidation(testCB, 1000, i/100.0)
-        #                 results[i/100.0].append((initial, final))
-        #                 print(i)
-        #             print("finished iteration", k)
-        #         for key in results.keys():
-        #             avgInit = 0.0
-        #             avgFinal = 0.0
-        #             for init, final in results[key]:
-        #                 avgInit += init
-        #                 avgFinal += final
-        #             if len(results[key]) != 0:
-        #                 print(str(key) + "," + str(avgInit / len(results[key])) + "," + str(avgFinal / len(results[key])))
+        # UserInput key:
+        # 0 = test key [4 = new weight generation] #NOTE: this will only generate weights; they must be applied manually in another test!!!
+        # 1 = modal key [0 = expert (weights), 1 = learned (features), 2 = mixed (weights)]
+        # 2 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
+        elif int(userInput[0]) == 4:
+            try:
+                iterStart = int(userInput[3])
+            except:
+                iterStart = 0
+            featureSelectionMode = int(userInput[1])
+            if featureSelectionMode == 0:
+                numFeatures = 85
+            elif featureSelectionMode == 1:
+                numFeatures = 1024
+            else:
+                numFeatures = 1109
+            maxNumEpochs = 80
+            for examplesPerAnimal in (10,20):
+                results = {}
+                for sigma in range(10, 91, 10):
+                    for m in range(iterStart, iterStart+NUMITERATIONS):
+                        if featureSelectionMode == 1 or featureSelectionMode == 2: #All learned, or mixed
+                            images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir, m, 4, 0, 1)
+                            invalidImageExistsFlag = True
+                            while invalidImageExistsFlag:
+                                try:
+                                    tf.keras.backend.clear_session()
+                                    network = DeepImageNetwork(numFeatures=features)
+                                    resized_images = network.train(np.array(images), np.array(labels), numEpochs=50)
+                                    invalidImageExistsFlag = False
+                                except:
+                                    print("invalid image found - resetting seed")
+                                    images, labels = helpers.generateImageSample(examplesPerAnimal, rootDir, m, 4, 0, 1)
+                                    continue
+                            extractor = tf.keras.Model(inputs=network.model.input,\
+                                                        outputs=network.model.layers[len(network.model.layers)-2].output)
+                            outputs = extractor.predict(resized_images)
+
+                        _, train, _ = Reader().readAwAForNN(rootDir)
+                        inputs_control = np.empty((examplesPerAnimal*50, numFeatures))
+                        labels = np.empty(examplesPerAnimal*50)
+                        for a in range(50):
+                            for e in range(examplesPerAnimal):
+                                for f in range(numFeatures):
+                                    if featureSelectionMode == 0 or (featureSelectionMode == 2 and f < 85):
+                                        inputs_control[a*examplesPerAnimal+e][f] = train[a][f]
+                                    elif featureSelectionMode == 1 or (featureSelectionMode == 2 and f >= 85):
+                                        inputs_control[a*examplesPerAnimal+e][f] = outputs[a*examplesPerAnimal+e][f]
+                                labels[a*examplesPerAnimal+e] = a
+                        
+                        tf.keras.backend.clear_session()
+                        network = FeatureNetwork(None, numFeatures, 50)
+                        network.train(inputs_control, labels, maxNumEpochs)
+                        control = network.predict(inputs_control)
+                        for i in range(numFeatures):
+                            accuracyCounts = [0,0,0]
+                            temp_plus = np.empty((examplesPerAnimal*50, numFeatures))
+                            temp_minus = np.empty((examplesPerAnimal*50, numFeatures))
+                            for a in range(50):
+                                for e in range(examplesPerAnimal):
+                                    for f in range(numFeatures):
+                                        if f != i:
+                                            temp_plus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f]
+                                            temp_minus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f]
+                                        else:
+                                            temp_plus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] + sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
+                                            temp_minus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] - sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
+                            plus = network.predict(temp_plus)
+                            minus = network.predict(temp_minus)
+                            for j in range(len(labels)):
+                                if labels[j] == np.argmax(control[j]):
+                                    accuracyCounts[0] += 1
+                                if labels[j] == np.argmax(plus[j]):
+                                    accuracyCounts[1] += 1
+                                if labels[j] == np.argmax(minus[j]):
+                                    accuracyCounts[2] += 1
+                            if results.get(i) == None:
+                                results[i] = {}
+                            if results[i].get(sigma) == None:
+                                results[i][sigma] = []
+                            finalValue = (abs(accuracyCounts[0] - accuracyCounts[1])/float(len(labels)) + abs(accuracyCounts[0] - accuracyCounts[2])/float(len(labels)))/2.0
+                            results[i][sigma].append(finalValue)
+
+                record = open("../results/" + userInput[0] + "_" + str(featureSelectionMode) + "_" + str(m) + "_results" + str(examplesPerAnimal) + ".csv", "w")
+                for iteration in results.keys():
+                    record.write(str(iteration) + "," + str(results[iteration]) + "\n")
+                record.close()
 
         #===================================
         else:
@@ -321,3 +368,45 @@ if __name__ == "__main__":
 #                             results = helpers.runTests(testCB, numIterations)
 #                     else:
 #                         helpers.runTests_retrain(numIterations, features, examplesPerAnimal, images, rootDir, userInput[2], userInput[4])
+
+# elif userInput[0] == "weightTest":
+        #     predicates, train, classes = Reader().readAwAForNN()
+        #         results = {}
+        #         for j in range(1, 101):
+        #             results[j/100.0] = []
+        #         for k in range(30):
+        #             for i in range(1, 41):
+        #                 testCB = CaseBase()
+        #                 # for case in Reader().readAwADataFromTxt("data/awa2/predicate-matrix-binary.txt", "data/awa2/classes.txt", "data/awa2/predicates.txt"):
+        #                 for case in Reader().readAwADataFromTxt("data/awa2/predicate-matrix-continuous.txt", "data/awa2/classes.txt", "data/awa2/predicates.txt"):
+        #                     testCB.addCase(case)
+        #                 # print("before", testCB.cases[list(testCB.cases.keys())[0]].features)
+        #                 initial = datasetTests.partialFeatureValidation(testCB, 1000, i/100.0)
+        #                 network = FeatureNetwork(None, 85, 50)
+        #                 network.train(np.array(train), np.array(list(classes.values())), 80)
+        #                 if i % 10 > 7:
+        #                     print(i, network.model.trainable_weights[0].numpy()[0]) #RELU as proper activation function?
+        #                 for case in testCB.cases.keys():
+        #                     absoluteMax = 0.0
+        #                     for feature in testCB.cases[case].features.keys():
+        #                         newWeights = network.model.trainable_weights[0].numpy()[predicates[feature]]
+        #                         weight = abs(newWeights[classes[testCB.cases[case].result[0]]])
+        #                         if weight > absoluteMax:
+        #                             absoluteMax = weight
+        #                         testCB.cases[case].features[feature].setWeight(weight) #TODO: account for regression
+        #                     for feature in testCB.cases[case].features.keys():
+        #                         featureObject = testCB.cases[case].features[feature]
+        #                         featureObject.setWeight(featureObject.getWeight() / absoluteMax)
+        #                 # print("after", testCB.cases[list(testCB.cases.keys())[0]].features)
+        #                 final = datasetTests.partialFeatureValidation(testCB, 1000, i/100.0)
+        #                 results[i/100.0].append((initial, final))
+        #                 print(i)
+        #             print("finished iteration", k)
+        #         for key in results.keys():
+        #             avgInit = 0.0
+        #             avgFinal = 0.0
+        #             for init, final in results[key]:
+        #                 avgInit += init
+        #                 avgFinal += final
+        #             if len(results[key]) != 0:
+        #                 print(str(key) + "," + str(avgInit / len(results[key])) + "," + str(avgFinal / len(results[key])))
