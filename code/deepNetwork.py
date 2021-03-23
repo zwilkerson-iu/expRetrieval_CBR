@@ -102,30 +102,3 @@ class FeatureNetwork:
     def predict(self, test_list:np.array):
         probability_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
         return probability_model.predict(test_list)
-
-
-    # def __init__(self, model:tf.keras.Sequential = None, photoDim:tuple = (1, 1), numOutputs:int = 1, numFeatures = 128, activation = "relu"):
-    #     if model is not None:
-    #         self.model = model
-    #     else:
-    #         self.model = tf.keras.Sequential([
-    #             tf.keras.layers.Flatten(input_shape=(photoDim[0], photoDim[1], 3)),
-    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-    #             tf.keras.layers.Dense(numFeatures, activation=activation, use_bias=False),
-    #             tf.keras.layers.Dense(numOutputs, use_bias=False)
-    #         ])
-
-    #         self.model.compile(optimizer='adam',
-    #                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    #                 metrics=['accuracy'])
-
-    # def train(self, train_images:np.array, train_labels:np.array, numEpochs:int = 10):
-    #     resized_images = []
-    #     print(train_labels)
-    #     for i in range(len(train_images)):
-    #         resized_images.append(tf.keras.preprocessing.image.smart_resize(train_images[i], (1200,1200)))
-    #     resized_images = np.array(resized_images)
-    #     self.model.fit(resized_images, train_labels, epochs=numEpochs, verbose=1)
-    #     return resized_images
