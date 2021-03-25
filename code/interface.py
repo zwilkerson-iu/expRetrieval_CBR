@@ -258,8 +258,9 @@ def run(runningSystem:str):
                         print(examplesPerAnimal, sigma, m)
 
                 record = open("../results/" + userInput[0] + "_" + str(featureSelectionMode) + "_" + str(m) + "_results" + str(examplesPerAnimal) + ".csv", "w")
-                for iteration in results.keys():
-                    record.write(str(iteration) + "," + str(results[iteration]) + "\n")
+                for feat in results.keys():
+                    for exampleNum in results[feat].keys():
+                        record.write(str(feat) + "," + str(exampleNum) + "," + ",".join(map(str, results[feat][exampleNum])) + "\n")
                 record.close()
 
         #===================================
