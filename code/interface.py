@@ -179,7 +179,7 @@ def run(runningSystem:str):
         # 2 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) == 4:
             try:
-                iterStart = int(userInput[3])
+                iterStart = int(userInput[2])
             except:
                 iterStart = 0
             featureSelectionMode = int(userInput[1])
