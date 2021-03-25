@@ -58,9 +58,9 @@ def run(runningSystem:str):
                                     except:
                                         helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (frac, 100-frac))
                                 try:
-                                        helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (100, 100))
-                                    except:
-                                        helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (100, 100))
+                                    helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (100, 100))
+                                except:
+                                    helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (100, 100))
                 else:
                     for features in [1024]:
                         print("==================")
