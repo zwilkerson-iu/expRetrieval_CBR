@@ -92,7 +92,7 @@ class FeatureNetwork:
     - numEpochs = the number of training iterations or epochs to perform
     """
     def train(self, train_featuresList:np.array, train_labels:np.array, numEpochs:int = 10):
-        self.model.fit(train_featuresList, train_labels, epochs=numEpochs, verbose=1)
+        self.model.fit(train_featuresList, train_labels, epochs=numEpochs, verbose=0)
 
     """
     Prediction algorithm for trained neural network
