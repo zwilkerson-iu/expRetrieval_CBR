@@ -176,14 +176,14 @@ Base testing function for the case-based reasoner
 - featureSelectionMode = type of test calling this function (i.e., expert, learned, or a combination)
 - randomBound = the randomness applied to the expert features
 - weightsUsed = key defining whether learned weights are also tested
-- featureFrac = when testing the combination of expert and learned features, a tuple representing the percentage of each feature set to consider per-case
-                    (will always sum to 100 unless testing 100% of both feature sets)
 Returns: a dictionary organizing testing results
 """
-def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed:int = 0, featureFrac:tuple = None):
+def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed:int = 0):
     results = {}
     outputs = None
     for k in range(numIterations[0], numIterations[1]):
+        if results.get(k) == None:
+            results[k] = {}
         if featureSelectionMode == 1 or featureSelectionMode == 2: #All learned, or mixed
             images, labels = generateImageSample(examplesPerAnimal, rootDir, k, featureSelectionMode, randomBound, weightsUsed)
             invalidImageExistsFlag = True
@@ -201,79 +201,88 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                                         outputs=network.model.layers[len(network.model.layers)-2].output)
             outputs = extractor.predict(resized_images)
 
-        cb = CaseBase()
-        for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomBound, featureFrac):
-            cb.addCase(case)
+        caseBases = {}
+        for randomness in range(1, randomBound+1):
+            results[k][randomness] = []
+            caseBases[randomness] = []
+            if featureSelectionMode == 2:
+                for frac in range(10, 101, 10):
+                    featureFrac = (frac, 100-frac)
+                    cb = CaseBase()
+                    for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, featureFrac):
+                        cb.addCase(case)
+                    caseBases[randomness].append(cb)
+            cb = CaseBase()
+            for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, (100,100)):
+                cb.addCase(case)
+            caseBases[randomness].append(cb)
 
-        if weightsUsed == 1 or weightsUsed == 2: #2 implies using test 4 to generate weights
-            _, _, classes = Reader().readAwAForNN(rootDir)
-            if featureSelectionMode == 0:
-                featureSet = np.empty((cb.caseBaseSize, 85))
-                labels = np.empty(cb.caseBaseSize)
-                keys = tuple(cb.cases.keys())
-                for c in range(len(keys)):
-                    features = tuple(cb.cases[keys[c]].features.keys())
-                    for f in range(len(features)):
-                        featureSet[c][f] = cb.cases[keys[c]].features[features[f]].value
-                    labels[c] = classes[cb.cases[keys[c]].result[0]]
-                weighter = FeatureNetwork(None, 85, 50)
-                weighter.train(featureSet, labels, 80) #TODO: set this based on epochs testing
-                for c in range(len(keys)):
-                    features = tuple(cb.cases[keys[c]].features.keys())
-                    absoluteMax = 0.0
-                    for f in range(len(features)):
-                        newWeights = weighter.model.trainable_weights[0].numpy()[f]
-                        weight = abs(newWeights[classes[cb.cases[keys[c]].result[0]]])
-                        if weight > absoluteMax:
-                            absoluteMax = weight
-                        cb.cases[keys[c]].features[features[f]].setWeight(weight)
-                    for featureName in features:
-                        cb.cases[keys[c]].features[featureName].setWeight(cb.cases[keys[c]].features[featureName].getWeight() / absoluteMax)
+        for randomness in caseBases.keys():
+            for cb in caseBases[randomness]:
+                if weightsUsed == 1 or weightsUsed == 2: #2 implies using test 4 to generate weights
+                    _, _, classes = Reader().readAwAForNN(rootDir)
+                    if featureSelectionMode == 0:
+                        featureSet = np.empty((cb.caseBaseSize, 85))
+                        labels = np.empty(cb.caseBaseSize)
+                        keys = tuple(cb.cases.keys())
+                        for c in range(len(keys)):
+                            features = tuple(cb.cases[keys[c]].features.keys())
+                            for f in range(len(features)):
+                                featureSet[c][f] = cb.cases[keys[c]].features[features[f]].value
+                            labels[c] = classes[cb.cases[keys[c]].result[0]]
+                        weighter = FeatureNetwork(None, 85, 50)
+                        weighter.train(featureSet, labels, 80) #TODO: set this based on epochs testing
+                        for c in range(len(keys)):
+                            features = tuple(cb.cases[keys[c]].features.keys())
+                            absoluteMax = 0.0
+                            for f in range(len(features)):
+                                newWeights = weighter.model.trainable_weights[0].numpy()[f]
+                                weight = abs(newWeights[classes[cb.cases[keys[c]].result[0]]])
+                                if weight > absoluteMax:
+                                    absoluteMax = weight
+                                cb.cases[keys[c]].features[features[f]].setWeight(weight)
+                            for featureName in features:
+                                cb.cases[keys[c]].features[featureName].setWeight(cb.cases[keys[c]].features[featureName].getWeight() / absoluteMax)
 
-            elif featureSelectionMode == 1:
-                newWeights = network.model.trainable_weights[-1].numpy()
-                for caseHash in cb.cases.keys():
-                    absoluteMax = 0.0
-                    for featureName in cb.cases[caseHash].features.keys():
-                        weightSet = newWeights[int(featureName[7:])]
-                        weight = abs(weightSet[classes[cb.cases[caseHash].result[0]]])
-                        if weight > absoluteMax:
-                            absoluteMax = weight
-                        cb.cases[caseHash].features[featureName].setWeight(weight)
-                    for featureName in cb.cases[caseHash].features.keys():
-                        cb.cases[caseHash].features[featureName].setWeight(cb.cases[caseHash].features[featureName].getWeight() / absoluteMax)
+                    elif featureSelectionMode == 1:
+                        newWeights = network.model.trainable_weights[-1].numpy()
+                        for caseHash in cb.cases.keys():
+                            absoluteMax = 0.0
+                            for featureName in cb.cases[caseHash].features.keys():
+                                weightSet = newWeights[int(featureName[7:])]
+                                weight = abs(weightSet[classes[cb.cases[caseHash].result[0]]])
+                                if weight > absoluteMax:
+                                    absoluteMax = weight
+                                cb.cases[caseHash].features[featureName].setWeight(weight)
+                            for featureName in cb.cases[caseHash].features.keys():
+                                cb.cases[caseHash].features[featureName].setWeight(cb.cases[caseHash].features[featureName].getWeight() / absoluteMax)
 
-            elif featureSelectionMode == 2:
-                pass
-                #TODO: implement???
+                    elif featureSelectionMode == 2:
+                        pass
+                        #TODO: implement???
 
-            elif weightsUsed == 2: #NOTE: these are absolute rather than local weights...
-                predicates, _, classes = Reader().readAwAForNN(rootDir)
-                newWeights = [] # newWeights needs to be a parameter that can only be set manually (from interface.py)
-                for caseHash in cb.cases.keys():
-                    for featureName in cb.cases[caseHash].features.keys():
-                        if predicates.get(featureName) != None:
-                            cb.cases[caseHash].features[featureName].setWeight(newWeights[classes[cb.cases[caseHash].result[0]]][predicates[featureName]])
-                        else:
-                            cb.cases[caseHash].features[featureName].setWeight(newWeights[classes[cb.cases[caseHash]]][85+int(featureName[7:])])
+                    elif weightsUsed == 2: #NOTE: these are absolute rather than local weights...
+                        predicates, _, classes = Reader().readAwAForNN(rootDir)
+                        newWeights = [] # newWeights needs to be a parameter that can only be set manually (from interface.py)
+                        for caseHash in cb.cases.keys():
+                            for featureName in cb.cases[caseHash].features.keys():
+                                if predicates.get(featureName) != None:
+                                    cb.cases[caseHash].features[featureName].setWeight(newWeights[classes[cb.cases[caseHash].result[0]]][predicates[featureName]])
+                                else:
+                                    cb.cases[caseHash].features[featureName].setWeight(newWeights[classes[cb.cases[caseHash]]][85+int(featureName[7:])])
 
-        results[k] = duplicatedFeatureValidation(cb, 1000)
-        print(str(k) + "," + str(results[k]))
+                results[k][randomness].append(duplicatedFeatureValidation(cb, 1000))
+                print(str(k) + "," + str(randomness) + ",", results[k][randomness])
 
-    ave = sum(list(results.values()))/len(list(results.values()))
-    std = statistics.stdev(list(results.values()))
-    results["average"] = ave
-    results["stdev"] = std
-    print("Average:", ave)
-    print("Standard deviation:", std)
-    if featureSelectionMode != 2:
-        record = open("../results/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + ".csv", "w")
-        for iteration in results.keys():
-            record.write(str(iteration) + "," + str(results[iteration]) + "\n")
-        record.close()
-    else:
-        record = open("../results/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + "_" + str(featureFrac[0]) + "_" + str(featureFrac[1]) + ".csv", "w")
-        for iteration in results.keys():
-            record.write(str(iteration) + "," + str(results[iteration]) + "\n")
+    # ave = sum(list(results.values()))/len(list(results.values()))
+    # std = statistics.stdev(list(results.values()))
+    # results["average"] = ave
+    # results["stdev"] = std
+    # print("Average:", ave)
+    # print("Standard deviation:", std)
+    for r in range(randomBound):
+        record = open("../results/" + str(featureSelectionMode) + "_" + str(r) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + ".csv", "w")
+        for m in results.keys():
+            record.write(str(m) + "," + ",".join(map(str, results[m][r])) + "\n")
         record.close()
     return results

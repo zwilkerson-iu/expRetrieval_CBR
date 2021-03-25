@@ -40,36 +40,14 @@ def run(runningSystem:str):
         # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) <= 2:
             for examplesPerAnimal in [10, 20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
-                if int(userInput[1]) != 0:
-                    for randomness in range(1, int(userInput[1])+1):
-                        for features in [1024]:
-                            print("==================")
-                            print(str(examplesPerAnimal) + " cases used per class")
-                            print(str(features) + " features used in neural network dense layers")
-                            if int(userInput[0]) == 0:
-                                try:
-                                    helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
-                                except:
-                                    helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]))
-                            else:
-                                for frac in range(10, 101, 10):
-                                    try:
-                                        helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (frac, 100-frac))
-                                    except:
-                                        helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (frac, 100-frac))
-                                try:
-                                    helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (100, 100))
-                                except:
-                                    helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), randomness, int(userInput[2]), (100, 100))
-                else:
-                    for features in [1024]:
-                        print("==================")
-                        print(str(examplesPerAnimal) + " cases used per class")
-                        print(str(features) + " features used in neural network dense layers")
-                        try:
-                            helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))
-                        except:
-                            helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), 0, int(userInput[2]))             
+                for features in [1024]:
+                    print("==================")
+                    print(str(examplesPerAnimal) + " cases used per class")
+                    print(str(features) + " features used in neural network dense layers (where applicable)")
+                    try:
+                        helpers.runTests((int(userInput[3]), int(userInput[3])+NUMITERATIONS), features, examplesPerAnimal, rootDir, int(userInput[0]), int(userInput[1]), int(userInput[2]))
+                    except:
+                        helpers.runTests((0, 30), features, examplesPerAnimal, rootDir, int(userInput[0]), int(userInput[1]), int(userInput[2]))         
 
         # UserInput key:
         # 0 = test key [3 = epochs]
