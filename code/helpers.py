@@ -206,7 +206,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
             results[k][randomness] = []
             caseBases[randomness] = []
             if featureSelectionMode == 2:
-                for frac in range(10, 101, 10):
+                for frac in range(10, 91, 10):
                     featureFrac = (frac, 100-frac)
                     cb = CaseBase()
                     for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, featureFrac):
