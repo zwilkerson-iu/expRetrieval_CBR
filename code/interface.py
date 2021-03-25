@@ -255,6 +255,7 @@ def run(runningSystem:str):
                                 results[i][sigma] = []
                             finalValue = (abs(accuracyCounts[0] - accuracyCounts[1])/float(len(labels)) + abs(accuracyCounts[0] - accuracyCounts[2])/float(len(labels)))/2.0
                             results[i][sigma].append(finalValue)
+                        print(numImagesPerAnimal, sigma, m)
 
                 record = open("../results/" + userInput[0] + "_" + str(featureSelectionMode) + "_" + str(m) + "_results" + str(examplesPerAnimal) + ".csv", "w")
                 for iteration in results.keys():
