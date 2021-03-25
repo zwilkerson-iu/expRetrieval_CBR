@@ -266,8 +266,14 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
     results["stdev"] = std
     print("Average:", ave)
     print("Standard deviation:", std)
-    record = open("../results/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + ".csv", "w")
-    for iteration in results.keys():
-        record.write(str(iteration) + "," + str(results[iteration]) + "\n")
-    record.close()
+    if featureSelectionMode != 2:
+        record = open("../results/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + ".csv", "w")
+        for iteration in results.keys():
+            record.write(str(iteration) + "," + str(results[iteration]) + "\n")
+        record.close()
+    else:
+        record = open("../results/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + "_" + str(featureFrac[0]) + "_" + str(featureFrac[1]) + ".csv", "w")
+        for iteration in results.keys():
+            record.write(str(iteration) + "," + str(results[iteration]) + "\n")
+        record.close()
     return results
