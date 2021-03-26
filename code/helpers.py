@@ -128,6 +128,7 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
         expertFeatures = random.sample(tuple(cases[0].features.keys()), int(0.01*featureFraction[0]*len(cases[0].features.keys())))
         print("selecting learned fraction")
         nnFeatures = random.sample((range(0, len(learnedFeatures[0]))), int(0.01*featureFraction[1]*len(learnedFeatures[0])))
+        print("done selecting learned fraction")
         for case in cases:
             index = classes.index(case.result[0])
             for j in range(numImagesPerAnimal):
@@ -144,6 +145,7 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
                     if i in nnFeatures:
                         temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
                 cases.append(temp)
+            print(case)
     elif featureSelectionMode == 1:
         for caseName in classes:
             index = classes.index(caseName)
