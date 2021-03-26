@@ -119,7 +119,7 @@ Creates the list of cases to be added to the case base in a given test iteration
 Returns: A set of case objects to be added to the case base
 """
 def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:int, learnedFeatures = None, randomBound:int = 0, featureFraction:tuple = None):
-    cases = []
+    casesRet = []
     classes = os.listdir(rootDir + "awa2/JPEGImages")
     if featureSelectionMode == 2:
         print("beginning case generation")
@@ -144,8 +144,7 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
                 for i in range(len(learnedFeatures[0])):
                     if i in nnFeatures:
                         temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
-                cases.append(temp)
-            print(case)
+                casesRet.append(temp)
     elif featureSelectionMode == 1:
         for caseName in classes:
             index = classes.index(caseName)
@@ -153,7 +152,7 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
                 temp = Case({}, (caseName, 1.0))
                 for i in range(len(learnedFeatures[0])):
                     temp.addNewFeature(Feature("Feature" + str(i), float(learnedFeatures[index * numImagesPerAnimal + j][i]), 1, "euclideanDistance"))
-                cases.append(temp)
+                casesRet.append(temp)
     elif featureSelectionMode == 0:
         for case in Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt"):
             for j in range(numImagesPerAnimal):
@@ -167,11 +166,11 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
                         # r = random.uniform(1.0 - randomBound * 0.01, 1.0 + randomBound * 0.01)
                         # print(r)
                         temp.editFeature(featureName, temp.getFeature(featureName).getValue() * r)
-                cases.append(temp)
+                casesRet.append(temp)
     else:
         print("ERROR: invalid feature selection mode")
     print("finished generating case list")
-    return cases
+    return casesRet
 
 """
 Base testing function for the case-based reasoner
