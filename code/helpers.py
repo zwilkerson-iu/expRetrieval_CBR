@@ -122,13 +122,9 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
     casesRet = []
     classes = os.listdir(rootDir + "awa2/JPEGImages")
     if featureSelectionMode == 2:
-        print("beginning case generation")
         cases = Reader().readAwADataFromTxt(rootDir + "awa2/predicate-matrix-continuous.txt", rootDir + "awa2/classes.txt", rootDir + "awa2/predicates.txt")
-        print("selecting expert fraction")
         expertFeatures = random.sample(tuple(cases[0].features.keys()), int(0.01*featureFraction[0]*len(cases[0].features.keys())))
-        print("selecting learned fraction")
         nnFeatures = random.sample((range(0, len(learnedFeatures[0]))), int(0.01*featureFraction[1]*len(learnedFeatures[0])))
-        print("done selecting learned fraction")
         for case in cases:
             index = classes.index(case.result[0])
             for j in range(numImagesPerAnimal):
@@ -169,7 +165,6 @@ def generateCaseList(numImagesPerAnimal:int, rootDir:str, featureSelectionMode:i
                 casesRet.append(temp)
     else:
         print("ERROR: invalid feature selection mode")
-    print("finished generating case list")
     return casesRet
 
 """
@@ -218,15 +213,15 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
             caseBases[randomness] = []
             if featureSelectionMode == 2:
                 for frac in range(10, 91, 20):
-                    print(frac)
+                    # print(frac)
                     featureFrac = (frac, 100-frac)
                     cb = CaseBase()
-                    print("generating case list")
+                    # print("generating case list")
                     for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, featureFrac):
                         cb.addCase(case)
-                    print("finished with case base")
+                    # print("finished with case base")
                     caseBases[randomness].append(cb) #TODO: the kill seems to happen here, so probably adjust so that we don't aggregate in caseBases
-                    print("case base added to dictionary")
+                    # print("case base added to dictionary")
             cb = CaseBase()
             for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, (100,100)):
                 cb.addCase(case)
