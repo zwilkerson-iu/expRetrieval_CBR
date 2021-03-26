@@ -1,6 +1,8 @@
 from case import Case
 from feature import Feature
 import numpy as np
+import os
+import statistics
 
 class Reader:
 
@@ -113,3 +115,94 @@ class Reader:
         reader.close()
 
         return (predicates, train, classes)
+
+    #TODO documentation
+    def analyzeData(self, rootDir:str, arg1:int, arg2:int):
+        if arg1 == 0 or arg1 == 4:
+            results = {10:{}, 20:{}}
+        elif arg1 == 1:
+            results = {10:[], 20:[]}
+        else:
+            results = {}
+        files = []
+        if arg1 == 0 or arg1 == 1:
+            for filename in os.listdir(rootDir):
+                if filename[0] == str(arg1) and filename[4] == str(arg2):
+                    files.append(filename)
+        else:
+            for filename in os.listdir(rootDir):
+                if filename[0] == str(arg1) and filename[2] == str(arg2):
+                    files.append(filename)
+        for filename in files:
+            if arg1 == 0 or arg1 == 1:
+                exampleCount = int(filename[-6:-4])
+                reader = open(rootDir + filename, "r")
+                if arg1 == 0:
+                    if results[exampleCount].get(int(filename[2])) is None:
+                        results[exampleCount][int(filename[2])] = []
+                    for line in reader.readlines():
+                        words = line.split(",")
+                        if words[0] != "average" and words[0] != "stdev":
+                            results[exampleCount][int(filename[2])].append(float(words[1]))
+                elif arg1 == 1:
+                    for line in reader.readlines():
+                        words = line.split(",")
+                        if words[0] != "average" and words[0] != "stdev":
+                            results[exampleCount].append(float(words[1]))
+            elif arg1 == 4:
+                exampleCount = int(filename[-6:-4])
+                reader = open(rootDir + filename, "r")
+                for line in reader.readlines():
+                    words = line.split(",")
+                    if words[0] != "average" and words[0] != "stdev":
+                        if results[exampleCount].get(int(words[0])) is None:
+                            results[exampleCount][int(words[0])] = {}
+                        if results[exampleCount][int(words[0])].get(int(words[1])) is None:
+                            results[exampleCount][int(words[0])][int(words[1])] = []
+                        for i in range(2, 7):
+                            results[exampleCount][int(words[0])][int(words[1])].append(float(words[i]))
+            elif arg1 == 3:
+                reader = open(rootDir + filename, "r")
+                for line in reader.readlines():
+                    words = line.split(",")
+                    if words[0] != "average" and words[0] != "stdev":
+                        if results.get(int(words[0])) is None:
+                            results[int(words[0])] = []
+                        for i in range(1, 6):
+                            results[int(words[0])].append(float(words[i]))
+        if arg1 == 0:
+            for example in results.keys():
+                record = open(rootDir + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_finalResults.csv", "w")
+                record.write("rand. mult.,average,stdev,raw values\n")
+                for rand in results[example].keys():
+                    stdev = statistics.stdev(results[example][rand])
+                    ave = sum(results[example][rand]) / float(len(results[example][rand]))
+                    record.write(str(rand) + "," + str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example][rand])) + "\n")
+                record.close()
+        elif arg1 == 1:
+            for example in results.keys():
+                record = open(rootDir + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_finalResults.csv", "w")
+                record.write("average,stdev,raw values\n")
+                stdev = statistics.stdev(results[example])
+                ave = sum(results[example]) / float(len(results[example]))
+                record.write(str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example])) + "\n")
+                record.close()
+        elif arg1 == 3:
+            record = open(rootDir + str(arg1) + "_" + str(arg2) + "_finalResults.csv", "w")
+            record.write("epochs,average,stdev,raw values\n")
+            for epoch in results[example].keys():
+                stdev = statistics.stdev(results[epoch])
+                ave = sum(results[epoch]) / float(len(results[epoch]))
+                record.write(str(epoch) + "," + str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[epoch])) + "\n")
+            record.close()
+        elif arg1 == 4:
+            for example in results.keys():
+                for multiplier in results[example][0].keys():
+                    record = open(rootDir + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_" + str(multiplier) + "_finalResults.csv", "w")
+                    record.write("feature,average,stdev,raw values\n")
+                    for feature in results[example][multiplier].keys():
+                        stdev = statistics.stdev(results[example][multiplier][feature])
+                        ave = sum(results[example][multiplier][feature]) / float(len(results[example][multiplier][feature]))
+                        record.write(str(feature) + "," + str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example][multiplier][feature])) + "\n")
+                    record.close()
+        # print(results)

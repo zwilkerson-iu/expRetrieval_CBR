@@ -17,11 +17,11 @@ def run(runningSystem:str):
         rootDir = "../../expRetrieval_CBR_data/"
     else: #remote
         rootDir = "/l/vision/magnemite/expRetrieval_CBR_data/" #***Need to command "conda activate tensorflow" before running this mode
+    saveDir = "../results/"
     NUMITERATIONS = 5
 
-    print("Ready for command:")
-
     while True:
+        print("Ready for command:")
         userInput = input().split(" ")
         
         #===================================
@@ -29,6 +29,13 @@ def run(runningSystem:str):
         if userInput[0] == "q":
             print("Terminating program")
             break
+
+        #===================================
+        #Perform data analysis/reformatting
+        elif userInput[0] == "a":
+            arg1 = int(userInput[1])
+            arg2 = int(userInput[2])
+            Reader().analyzeData(saveDir, arg1, arg2)
 
         #===================================
         #Run tests, considering learned features/weights
@@ -39,7 +46,7 @@ def run(runningSystem:str):
         # 2 = weights used key [0 = False, 1 = True]
         # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) <= 2:
-            for examplesPerAnimal in [10, 20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
+            for examplesPerAnimal in [10]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
                 for features in [1024]:
                     print("==================")
                     print(str(examplesPerAnimal) + " cases used per class")

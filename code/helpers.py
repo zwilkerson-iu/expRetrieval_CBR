@@ -202,7 +202,13 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
             outputs = extractor.predict(resized_images)
 
         caseBases = {}
-        for randomness in range(1, randomBound+1):
+        if randomBound == 11:
+            randStart = 1
+            randEnd = randomBound
+        else:
+            randStart = randomBound
+            randEnd = randomBound+1
+        for randomness in range(randStart, randEnd):
             results[k][randomness] = []
             caseBases[randomness] = []
             if featureSelectionMode == 2:
@@ -280,7 +286,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
     # results["stdev"] = std
     # print("Average:", ave)
     # print("Standard deviation:", std)
-    for r in range(randomBound):
+    for r in results[k].keys():
         record = open("../results/" + str(featureSelectionMode) + "_" + str(r) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + ".csv", "w")
         for m in results.keys():
             record.write(str(m) + "," + ",".join(map(str, results[m][r])) + "\n")
