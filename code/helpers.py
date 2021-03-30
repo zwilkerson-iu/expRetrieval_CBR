@@ -178,7 +178,7 @@ Base testing function for the case-based reasoner
 - weightsUsed = key defining whether learned weights are also tested
 Returns: a dictionary organizing testing results
 """
-def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed:int = 0):
+def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed:int = 0, sigma:int = 80):
     results = {}
     outputs = None
     for k in range(numIterations[0], numIterations[1]):
@@ -213,15 +213,11 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
             caseBases[randomness] = []
             if featureSelectionMode == 2:
                 for frac in range(10, 91, 20):
-                    # print(frac)
                     featureFrac = (frac, 100-frac)
                     cb = CaseBase()
-                    # print("generating case list")
                     for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, featureFrac):
                         cb.addCase(case)
-                    # print("finished with case base")
-                    caseBases[randomness].append(cb) #TODO: the kill seems to happen here, so probably adjust so that we don't aggregate in caseBases
-                    # print("case base added to dictionary")
+                    caseBases[randomness].append(cb)
             cb = CaseBase()
             for case in generateCaseList(examplesPerAnimal, rootDir, featureSelectionMode, outputs, randomness, (100,100)):
                 cb.addCase(case)
@@ -273,27 +269,68 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                         #TODO: implement???
 
                     elif weightsUsed == 2: #NOTE: these are absolute rather than local weights...
-                        predicates, _, classes = Reader().readAwAForNN(rootDir)
-                        newWeights = [] # newWeights needs to be a parameter that can only be set manually (from interface.py)
+                        # predicates, _, classes = Reader().readAwAForNN(rootDir)
+                        newWeights = generateWeights(cb, examplesPerAnimal, sigma) # newWeights needs to be a parameter that can only be set manually (from interface.py)
                         for caseHash in cb.cases.keys():
                             for featureName in cb.cases[caseHash].features.keys():
-                                if predicates.get(featureName) != None:
-                                    cb.cases[caseHash].features[featureName].setWeight(newWeights[classes[cb.cases[caseHash].result[0]]][predicates[featureName]])
-                                else:
-                                    cb.cases[caseHash].features[featureName].setWeight(newWeights[classes[cb.cases[caseHash]]][85+int(featureName[7:])])
+                                cb.cases[caseHash].features[featureName].setWeight(newWeights[featureName])
+                    print("weights generated and applied")
+                
 
                 results[k][randomness].append(duplicatedFeatureValidation(cb, 1000))
                 print(str(k) + "," + str(randomness) + ",", results[k][randomness])
 
-    # ave = sum(list(results.values()))/len(list(results.values()))
-    # std = statistics.stdev(list(results.values()))
-    # results["average"] = ave
-    # results["stdev"] = std
-    # print("Average:", ave)
-    # print("Standard deviation:", std)
     for r in results[k].keys():
         record = open("../results/" + str(featureSelectionMode) + "_" + str(r) + "_" + str(weightsUsed) + "_" + str(k) + "_results" + str(examplesPerAnimal) + ".csv", "w")
         for m in results.keys():
             record.write(str(m) + "," + ",".join(map(str, results[m][r])) + "\n")
         record.close()
     return results
+
+#TODO: documentation
+def generateWeights(cb:CaseBase, examplesPerAnimal:int, sigma:int, maxNumEpochs:int = 80):
+    weights = {}
+    numFeatures = len(tuple(cb.cases[tuple(cb.cases.keys())[0]].features()))
+    featuresList = tuple(cb.cases[tuple(cb.cases.keys())[0]].features())
+    inputs_control = np.empty((examplesPerAnimal*50, numFeatures))
+    labels = np.empty(examplesPerAnimal*50)
+    counter = [0,0]
+    for featureName in featuresList:
+        weights[featureName] = 0.0
+    for caseHash in cb.cases.keys():            
+        for featureName in cb.cases[caseHash].features.keys():
+            inputs_control[counter[0]][counter[1]] = cb.cases[caseHash].features[featureName].value
+            labels[counter[0]] = cb.cases[caseHash].result[0]
+            counter[1] += 1
+        counter[0] += 1
+        counter[1] = 0
+    
+    tf.keras.backend.clear_session()
+    network = FeatureNetwork(None, numFeatures, 50)
+    network.train(inputs_control, labels, maxNumEpochs)
+    control = network.predict(inputs_control)
+    for i in range(numFeatures):
+        accuracyCounts = [0,0,0]
+        temp_plus = np.empty((examplesPerAnimal*50, numFeatures))
+        temp_minus = np.empty((examplesPerAnimal*50, numFeatures))
+        for a in range(50):
+            for e in range(examplesPerAnimal):
+                for f in range(numFeatures):
+                    if f != i:
+                        temp_plus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f]
+                        temp_minus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f]
+                    else:
+                        temp_plus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] + sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
+                        temp_minus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] - sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
+        plus = network.predict(temp_plus)
+        minus = network.predict(temp_minus)
+        for j in range(len(labels)):
+            if labels[j] == np.argmax(control[j]):
+                accuracyCounts[0] += 1
+            if labels[j] == np.argmax(plus[j]):
+                accuracyCounts[1] += 1
+            if labels[j] == np.argmax(minus[j]):
+                accuracyCounts[2] += 1
+        finalValue = (abs(accuracyCounts[0] - accuracyCounts[1])/float(len(labels)) + abs(accuracyCounts[0] - accuracyCounts[2])/float(len(labels)))/2.0
+        weights[featuresList[i]] = finalValue
+    return weights

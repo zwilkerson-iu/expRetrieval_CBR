@@ -50,7 +50,7 @@ def run(runningSystem:str):
         # 2 = weights used key [0 = False, 1 = True]
         # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) <= 2:
-            for examplesPerAnimal in [10]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
+            for examplesPerAnimal in [10, 20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
                 for features in [1024]:
                     print("==================")
                     print(str(examplesPerAnimal) + " cases used per class")
@@ -212,7 +212,8 @@ def run(runningSystem:str):
                                         inputs_control[a*examplesPerAnimal+e][f] = outputs[a*examplesPerAnimal+e][f]
                                 labels[a*examplesPerAnimal+e] = a
                         
-                        tf.keras.backend.clear_session()
+                        if featureSelectionMode == 0:
+                            tf.keras.backend.clear_session()
                         network = FeatureNetwork(None, numFeatures, 50)
                         network.train(inputs_control, labels, maxNumEpochs)
                         control = network.predict(inputs_control)
