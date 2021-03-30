@@ -227,16 +227,15 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
         for randomness in caseBases.keys():
             for cb in caseBases[randomness]:
                 if weightsUsed == 1 or weightsUsed == 2: #2 implies using test 4 to generate weights
-
+                    _, _, classes = Reader().readAwAForNN(rootDir)
                     if weightsUsed == 2: #NOTE: these are absolute rather than local weights...
-                        newWeights = generateWeights(cb, examplesPerAnimal, sigma) # newWeights needs to be a parameter that can only be set manually (from interface.py)
+                        newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma) # newWeights needs to be a parameter that can only be set manually (from interface.py)
                         for caseHash in cb.cases.keys():
                             for featureName in cb.cases[caseHash].features.keys():
                                 cb.cases[caseHash].features[featureName].setWeight(newWeights[featureName])
                         print("new weights used")
 
                     elif featureSelectionMode == 0:
-                        _, _, classes = Reader().readAwAForNN(rootDir)
                         featureSet = np.empty((cb.caseBaseSize, 85))
                         labels = np.empty(cb.caseBaseSize)
                         keys = tuple(cb.cases.keys())
@@ -260,7 +259,6 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                                 cb.cases[keys[c]].features[featureName].setWeight(cb.cases[keys[c]].features[featureName].getWeight() / absoluteMax)
 
                     elif featureSelectionMode == 1:
-                        _, _, classes = Reader().readAwAForNN(rootDir)
                         newWeights = network.model.trainable_weights[-1].numpy()
                         for caseHash in cb.cases.keys():
                             absoluteMax = 0.0
@@ -290,7 +288,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
     return results
 
 #TODO: documentation
-def generateWeights(cb:CaseBase, examplesPerAnimal:int, sigma:int, maxNumEpochs:int = 80):
+def generateWeights(cb:CaseBase, examplesPerAnimal:int, classes, sigma:int, maxNumEpochs:int = 80):
     weights = {}
     featuresList = tuple(cb.cases[tuple(cb.cases.keys())[0]].features.keys())
     numFeatures = len(featuresList)
@@ -302,7 +300,7 @@ def generateWeights(cb:CaseBase, examplesPerAnimal:int, sigma:int, maxNumEpochs:
     for caseHash in cb.cases.keys():            
         for featureName in cb.cases[caseHash].features.keys():
             inputs_control[counter[0]][counter[1]] = cb.cases[caseHash].features[featureName].value
-            labels[counter[0]] = cb.cases[caseHash].result[0]
+            labels[counter[0]] = classes[cb.cases[caseHash].result[0]]
             counter[1] += 1
         counter[0] += 1
         counter[1] = 0
