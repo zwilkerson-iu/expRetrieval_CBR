@@ -47,7 +47,7 @@ def run(runningSystem:str):
         # UserInput key:
         # 0 = test key [0 = expert, 1 = learned, 2 = mixed]
         # 1 = randomness bound [1,10]
-        # 2 = weights used key [0 = False, 1 = True]
+        # 2 = weights used key [0 = False, 1 = True, 2 = New Weights Method]
         # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) <= 2:
             for examplesPerAnimal in [10, 20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
