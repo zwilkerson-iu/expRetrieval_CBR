@@ -121,8 +121,9 @@ class Reader:
     - rootDir = root directory of the system (testing parameter)
     - arg1 = test definition argument, on [0,4]
     - arg2 = test specification argument
+    - arg3 = optional argument when running later iterations of the same test (either to reduce stdev or test extra ideas without revamping file naming)
     """
-    def analyzeData(self, rootDir:str, arg1:int, arg2:int):
+    def analyzeData(self, rootDir:str, arg1:int, arg2:int, arg3:int = 0):
         if arg1 == 0 or arg1 == 2 or arg1 == 4:
             results = {10:{}, 20:{}}
         elif arg1 == 1:
@@ -135,12 +136,13 @@ class Reader:
         files = []
         if arg1 == 0 or arg1 == 1 or arg1 == 2:
             for filename in os.listdir(rootDir):
-                if filename[0] == str(arg1) and filename[4] == str(arg2):
+                if filename[0] == str(arg1) and filename[4] == str(arg2) and (filename[6] == 'r' or int(filename[6]) >= arg3):
                     files.append(filename)
         else:
             for filename in os.listdir(rootDir):
                 if filename[0] == str(arg1) and filename[2] == str(arg2):
-                    files.append(filename)
+                    if (arg1 == 3 and (filename[6] == 'r' or int(filename[6]) >= arg3)) or (arg1 == 4 and (filename[4] == 'r' or int(filename[4]) >= arg3)):
+                        files.append(filename)
         for filename in files:
             if arg1 == 0 or arg1 == 1 or arg1 == 2:
                 exampleCount = int(filename[-6:-4])

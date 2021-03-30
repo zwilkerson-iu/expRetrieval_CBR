@@ -35,7 +35,11 @@ def run(runningSystem:str):
         elif userInput[0] == "a":
             arg1 = int(userInput[1])
             arg2 = int(userInput[2])
-            Reader().analyzeData(saveDir, arg1, arg2)
+            try:
+                arg3 = int(userInput[3])
+                Reader().analyzeData(saveDir, arg1, arg2, arg3)
+            except:
+                Reader().analyzeData(saveDir, arg1, arg2)
 
         #===================================
         #Run tests, considering learned features/weights
@@ -46,7 +50,7 @@ def run(runningSystem:str):
         # 2 = weights used key [0 = False, 1 = True]
         # 3 = optional value to set limits of iterations (i.e., x to x+5) for parallelism
         elif int(userInput[0]) <= 2:
-            for examplesPerAnimal in [20]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
+            for examplesPerAnimal in [10]: #Maybe add 50 later; maximum is 100 images per class, assuming no invalid ones in the smallest class
                 for features in [1024]:
                     print("==================")
                     print(str(examplesPerAnimal) + " cases used per class")
