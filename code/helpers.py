@@ -292,8 +292,8 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
 #TODO: documentation
 def generateWeights(cb:CaseBase, examplesPerAnimal:int, sigma:int, maxNumEpochs:int = 80):
     weights = {}
-    numFeatures = len(tuple(cb.cases[tuple(cb.cases.keys())[0]].features()))
-    featuresList = tuple(cb.cases[tuple(cb.cases.keys())[0]].features())
+    featuresList = tuple(cb.cases[tuple(cb.cases.keys())[0]].features.keys())
+    numFeatures = len(featuresList)
     inputs_control = np.empty((examplesPerAnimal*50, numFeatures))
     labels = np.empty(examplesPerAnimal*50)
     counter = [0,0]
