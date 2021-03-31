@@ -178,7 +178,7 @@ Base testing function for the case-based reasoner
 - weightsUsed = key defining whether learned weights are also tested
 Returns: a dictionary organizing testing results
 """
-def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed:int = 0, sigma:int = 95):
+def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:str, featureSelectionMode:int, randomBound:int = 0, weightsUsed:int = 0, sigma:int = 80):
     results = {}
     outputs = None
     for k in range(numIterations[0], numIterations[1]):

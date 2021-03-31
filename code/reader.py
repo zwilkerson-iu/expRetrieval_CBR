@@ -136,13 +136,39 @@ class Reader:
         files = []
         if arg1 == 0 or arg1 == 1 or arg1 == 2:
             for filename in os.listdir(rootDir):
-                if filename[0] == str(arg1) and filename[4] == str(arg2) and (filename[6] == 'r' or int(filename[6]) >= arg3):
-                    files.append(filename)
+                if filename[0] == str(arg1) and filename[4] == str(arg2):
+                    if filename[6] == 'r':
+                        files.append(filename)
+                    else:
+                        s = 6
+                        e = 7
+                        while filename[e] != "_":
+                            e += 1
+                        if int(filename[s:e]) >= arg3 and int(filename[s:e]) < arg3+30:
+                            files.append(filename)
         else:
             for filename in os.listdir(rootDir):
                 if filename[0] == str(arg1) and filename[2] == str(arg2):
-                    if (arg1 == 3 and (filename[6] == 'r' or int(filename[6]) >= arg3)) or (arg1 == 4 and (filename[4] == 'r' or int(filename[4]) >= arg3)):
-                        files.append(filename)
+                    if arg1 == 3:
+                        if filename[6] == 'r':
+                            files.append(filename)
+                        else:
+                            s = 6
+                            e = 7
+                            while filename[e] != "_":
+                                e += 1
+                            if int(filename[s:e]) >= arg3 and int(filename[s:e]) < arg3+30:
+                                files.append(filename)
+                    else:
+                        if filename[4] == 'r':
+                            files.append(filename)
+                        else:
+                            s = 4
+                            e = 5
+                            while filename[e] != "_":
+                                e += 1
+                            if int(filename[s:e]) >= arg3 and int(filename[s:e]) < arg3+30:
+                                files.append(filename)
         for filename in files:
             if arg1 == 0 or arg1 == 1 or arg1 == 2:
                 exampleCount = int(filename[-6:-4])
@@ -199,7 +225,7 @@ class Reader:
                                 results["test"][int(words[0])].append(float(words[i]))
         if arg1 == 0:
             for example in results.keys():
-                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_finalResults.csv", "w")
+                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")
                 record.write("rand. mult.,average,stdev,raw values\n")
                 for rand in results[example].keys():
                     stdev = statistics.stdev(results[example][rand])
@@ -208,7 +234,7 @@ class Reader:
                 record.close()
         elif arg1 == 1:
             for example in results.keys():
-                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_finalResults.csv", "w")
+                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")
                 record.write("average,stdev,raw values\n")
                 stdev = statistics.stdev(results[example])
                 ave = sum(results[example]) / float(len(results[example]))
@@ -216,7 +242,7 @@ class Reader:
                 record.close()
         elif arg1 == 2:
             for example in results.keys():
-                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_finalResults.csv", "w")
+                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")
                 record.write("rand. mult.,expert %,average,stdev,raw values\n")
                 for rand in results[example].keys():
                     for frac in results[example][rand].keys():
@@ -225,7 +251,7 @@ class Reader:
                         record.write(str(rand) + "," + str(frac) + "," + str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example][rand][frac])) + "\n")
                 record.close()
         elif arg1 == 3:
-            record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_finalResults.csv", "w")
+            record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_finalResults.csv", "w")
             for word in results.keys():
                 record.write("epochs,average,stdev,raw values\n")
                 for epoch in results[word].keys():
@@ -236,7 +262,7 @@ class Reader:
             record.close()
         elif arg1 == 4:
             for example in results.keys():
-                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(example) + "_finalResults.csv", "w")
+                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")
                 for multiplier in results[example][0].keys():
                     record.write("feature,multiplier,average,stdev,raw values\n")
                     for feature in results[example].keys():
