@@ -305,8 +305,8 @@ def generateWeights(cb:CaseBase, examplesPerAnimal:int, classes, sigma:int, maxN
             counter[1] += 1
         counter[0] += 1
         counter[1] = 0
-    print(len(inputs_control[0]))
     print(labels)
+    print(len(inputs_control[0]))
     
     tf.keras.backend.clear_session()
     network = FeatureNetwork(None, numFeatures, 50)
@@ -334,6 +334,7 @@ def generateWeights(cb:CaseBase, examplesPerAnimal:int, classes, sigma:int, maxN
                 accuracyCounts[1] += 1
             if labels[j] == np.argmax(minus[j]):
                 accuracyCounts[2] += 1
+        print(accuracyCounts)
         finalValue = (abs(accuracyCounts[0] - accuracyCounts[1])/float(len(labels)) + abs(accuracyCounts[0] - accuracyCounts[2])/float(len(labels)))/2.0
         weights[featuresList[i]] = finalValue
     return weights
