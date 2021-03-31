@@ -229,7 +229,10 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                 if weightsUsed == 1 or weightsUsed == 2: #2 implies using test 4 to generate weights
                     _, _, classes = Reader().readAwAForNN(rootDir)
                     if weightsUsed == 2: #NOTE: these are absolute rather than local weights...
-                        newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma) # newWeights needs to be a parameter that can only be set manually (from interface.py)
+                        if featureSelectionMode == 1:
+                            newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma, 20) # newWeights needs to be a parameter that can only be set manually (from interface.py)
+                        else:
+                            newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma)
                         for caseHash in cb.cases.keys():
                             for featureName in cb.cases[caseHash].features.keys():
                                 cb.cases[caseHash].features[featureName].setWeight(newWeights[featureName])
@@ -325,7 +328,6 @@ def generateWeights(cb:CaseBase, examplesPerAnimal:int, classes, sigma:int, maxN
                     else:
                         temp_plus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] + sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
                         temp_minus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] - sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
-                        print(inputs_control[a*examplesPerAnimal+e][f])
         plus = network.predict(temp_plus)
         minus = network.predict(temp_minus)
         for j in range(len(labels)):
