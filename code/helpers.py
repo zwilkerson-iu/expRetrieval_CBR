@@ -325,6 +325,7 @@ def generateWeights(cb:CaseBase, examplesPerAnimal:int, classes, sigma:int, maxN
                     else:
                         temp_plus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] + sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
                         temp_minus[a*examplesPerAnimal+e][f] = inputs_control[a*examplesPerAnimal+e][f] - sigma*0.01*inputs_control[a*examplesPerAnimal+e][f]
+                        print(inputs_control[a*examplesPerAnimal+e][f])
         plus = network.predict(temp_plus)
         minus = network.predict(temp_minus)
         for j in range(len(labels)):
