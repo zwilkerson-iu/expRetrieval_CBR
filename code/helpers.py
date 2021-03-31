@@ -101,10 +101,10 @@ def generateImageSample(numImagesPerAnimal:int, rootDir:str, k:int, featureSelec
             temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + imageTemps[f], as_gray = False)
             images.append(temp)
             labels[index*numImagesPerAnimal+f] = index
-    record = open("../csvFiles/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + ".csv", "w")
-    for animal in imageRecord.keys():
-        record.write(animal + "," + ",".join(x for x in imageRecord[animal]) + "\n")
-    record.close()
+    # record = open("../csvFiles/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + ".csv", "w")
+    # for animal in imageRecord.keys():
+    #     record.write(animal + "," + ",".join(x for x in imageRecord[animal]) + "\n")
+    # record.close()
     return (images, labels)
 
 """
@@ -276,6 +276,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                         #TODO: implement???
 
                     print("weights generated and applied")
+                return
                 
                 results[k][randomness].append(duplicatedFeatureValidation(cb, 1000))
                 print(str(k) + "," + str(randomness) + ",", results[k][randomness])
@@ -304,6 +305,8 @@ def generateWeights(cb:CaseBase, examplesPerAnimal:int, classes, sigma:int, maxN
             counter[1] += 1
         counter[0] += 1
         counter[1] = 0
+    print(len(inputs_control[0]))
+    print(labels)
     
     tf.keras.backend.clear_session()
     network = FeatureNetwork(None, numFeatures, 50)
