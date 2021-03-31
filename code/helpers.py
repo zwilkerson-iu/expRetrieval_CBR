@@ -230,7 +230,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                     _, _, classes = Reader().readAwAForNN(rootDir)
                     if weightsUsed == 2: #NOTE: these are absolute rather than local weights...
                         if featureSelectionMode == 1:
-                            newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma, 20) # newWeights needs to be a parameter that can only be set manually (from interface.py)
+                            newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma, 5) # newWeights needs to be a parameter that can only be set manually (from interface.py)
                         else:
                             newWeights = generateWeights(cb, examplesPerAnimal, classes, sigma)
                         for caseHash in cb.cases.keys():
