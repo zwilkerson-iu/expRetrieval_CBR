@@ -250,7 +250,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                             weightFeatures = tuple(cb.cases[keys[c]].features.keys())
                             for f in range(len(weightFeatures)):
                                 featureSet[c][f] = cb.cases[keys[c]].features[weightFeatures[f]].value
-                            labels[c] = classes[cb.cases[keys[c]].result[0]]
+                            weightLabels[c] = classes[cb.cases[keys[c]].result[0]]
                         weighter = FeatureNetwork(None, numFeatures, 50)
                         if featureSelectionMode == 0:
                             weighter.train(featureSet, weightLabels, 80)
