@@ -170,6 +170,7 @@ def run(runningSystem:str):
                     extractor = tf.keras.Model(inputs=network.model.input,\
                                                 outputs=network.model.layers[len(network.model.layers)-2].output)
                     outputs = extractor.predict(resized_images)
+                    print("learned features generated")
 
                     fullTrain = np.empty((1000, 1109))
                     for c in range(50):
@@ -179,6 +180,7 @@ def run(runningSystem:str):
                                     fullTrain[c*20+e][f] = train[c][f]
                                 else:
                                     fullTrain[c*20+e][f] = outputs[c*20+e][f-85]
+                    print("full train feature vector assembled")
 
                     for i in range(1, maxNumEpochs+1):
                         tf.keras.backend.clear_session()
