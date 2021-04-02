@@ -160,7 +160,7 @@ def run(runningSystem:str):
                     while invalidImageExistsFlag:
                         try:
                             tf.keras.backend.clear_session()
-                            network = DeepImageNetwork(numFeatures=features)
+                            network = DeepImageNetwork(numFeatures=1024)
                             resized_images = network.train(np.array(images), np.array(labels), numEpochs=50)
                             invalidImageExistsFlag = False
                         except:
