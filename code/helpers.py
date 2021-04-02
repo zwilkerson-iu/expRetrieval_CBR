@@ -244,28 +244,28 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                         else:
                             numFeatures = 1109
                         featureSet = np.empty((cb.caseBaseSize, numFeatures))
-                        labels = np.empty(cb.caseBaseSize)
+                        weightLabels = np.empty(cb.caseBaseSize)
                         keys = tuple(cb.cases.keys())
                         for c in range(len(keys)):
-                            features = tuple(cb.cases[keys[c]].features.keys())
-                            for f in range(len(features)):
-                                featureSet[c][f] = cb.cases[keys[c]].features[features[f]].value
+                            weightFeatures = tuple(cb.cases[keys[c]].features.keys())
+                            for f in range(len(weightFeatures)):
+                                featureSet[c][f] = cb.cases[keys[c]].features[weightFeatures[f]].value
                             labels[c] = classes[cb.cases[keys[c]].result[0]]
                         weighter = FeatureNetwork(None, numFeatures, 50)
                         if featureSelectionMode == 0:
-                            weighter.train(featureSet, labels, 80)
+                            weighter.train(featureSet, weightLabels, 80)
                         else:
-                            weighter.train(featureSet, labels, 5) #TODO: set this based on epochs testing
+                            weighter.train(featureSet, weightLabels, 5) #TODO: set this based on epochs testing
                         for c in range(len(keys)):
-                            features = tuple(cb.cases[keys[c]].features.keys())
+                            weightFeatures = tuple(cb.cases[keys[c]].features.keys())
                             absoluteMax = 0.0
-                            for f in range(len(features)):
+                            for f in range(len(weightFeatures)):
                                 newWeights = weighter.model.trainable_weights[0].numpy()[f]
                                 weight = abs(newWeights[classes[cb.cases[keys[c]].result[0]]])
                                 if weight > absoluteMax:
                                     absoluteMax = weight
-                                cb.cases[keys[c]].features[features[f]].setWeight(weight)
-                            for featureName in features:
+                                cb.cases[keys[c]].features[weightFeatures[f]].setWeight(weight)
+                            for featureName in weightFeatures:
                                 cb.cases[keys[c]].features[featureName].setWeight(cb.cases[keys[c]].features[featureName].getWeight() / absoluteMax)
 
                     elif featureSelectionMode == 1:
