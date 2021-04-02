@@ -72,6 +72,7 @@ def run(runningSystem:str):
                 iterStart = 0
             maxNumEpochs = int(userInput[2])
             results = {}
+
             if int(userInput[1]) == 0:
                 for k in range(1, maxNumEpochs+1):
                     results[k] = []
@@ -89,6 +90,7 @@ def run(runningSystem:str):
                         results[i].append(accuracyCount / 50.0)
                 for k in range(1, maxNumEpochs+1):
                     print(str(k) + "," + str(sum(results[k]) / float(len(results[k]))))
+
             elif int(userInput[1]) == 1:
                 for k in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
                     results[k] = ([],[])
@@ -147,10 +149,50 @@ def run(runningSystem:str):
                         print(accuracyCount / (20*50.0))
                 for k in results.keys():
                     print(str(k) + "," + str(sum(results[k][0]) / float(len(results[k][0]))) + "," + str(sum(results[k][1]) / float(len(results[k][1]))))
+
             elif int(userInput[1]) == 2:
-                pass
-                #TODO: implement??? (or use alternate weights???)
-            if int(userInput[1]) == 0:
+                for k in range(1, maxNumEpochs+1):
+                    results[k] = []
+                _, train, _ = Reader().readAwAForNN(rootDir)
+                for m in range(iterStart, iterStart+NUMITERATIONS):
+                    images, labels = helpers.generateImageSample(20, rootDir, m, -2, 0, maxNumEpochs)
+                    invalidImageExistsFlag = True
+                    while invalidImageExistsFlag:
+                        try:
+                            tf.keras.backend.clear_session()
+                            network = DeepImageNetwork(numFeatures=features)
+                            resized_images = network.train(np.array(images), np.array(labels), numEpochs=50)
+                            invalidImageExistsFlag = False
+                        except:
+                            print("invalid image found - resetting seed")
+                            images, labels = helpers.generateImageSample(20, rootDir, m, -2, 0, maxNumEpochs)
+                            continue
+                    extractor = tf.keras.Model(inputs=network.model.input,\
+                                                outputs=network.model.layers[len(network.model.layers)-2].output)
+                    outputs = extractor.predict(resized_images)
+
+                    fullTrain = np.empty((1000, 1109))
+                    for c in range(50):
+                        for e in range(20):
+                            for f in range(1109):
+                                if f < 85:
+                                    fullTrain[c*20+e][f] = train[c][f]
+                                else:
+                                    fullTrain[c*20+e][f] = outputs[c*20+e][f-85]
+
+                    for i in range(1, maxNumEpochs+1):
+                        tf.keras.backend.clear_session()
+                        network = FeatureNetwork(None, 1109, 50)
+                        network.train(fullTrain, np.array(labels), i)
+                        prediction = network.predict(fullTrain)
+                        accuracyCount = 0
+                        for j in range(50):
+                            if j == np.argmax(prediction[j]):
+                                accuracyCount += 1
+                        results[i].append(accuracyCount / 50.0)
+                        print(str(i) + "," + str(sum(results[i]) / float(len(results[i]))))
+
+            if int(userInput[1]) == 0 or int(userInput[1]) == 2:
                 record = open("../results/" + userInput[0] + "_" + userInput[1] + "_" + userInput[2] + "_" + str(m) + "_results.csv", "w")
                 for iteration in results.keys():
                     record.write(str(iteration) + "," + ",".join(map(str, results[iteration])) + "\n")

@@ -101,10 +101,10 @@ def generateImageSample(numImagesPerAnimal:int, rootDir:str, k:int, featureSelec
             temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + imageTemps[f], as_gray = False)
             images.append(temp)
             labels[index*numImagesPerAnimal+f] = index
-    # record = open("../csvFiles/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + ".csv", "w")
-    # for animal in imageRecord.keys():
-    #     record.write(animal + "," + ",".join(x for x in imageRecord[animal]) + "\n")
-    # record.close()
+    record = open("../csvFiles/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + ".csv", "w")
+    for animal in imageRecord.keys():
+        record.write(animal + "," + ",".join(x for x in imageRecord[animal]) + "\n")
+    record.close()
     return (images, labels)
 
 """
@@ -238,8 +238,12 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                                 cb.cases[caseHash].features[featureName].setWeight(newWeights[featureName])
                         print("new weights used")
 
-                    elif featureSelectionMode == 0:
-                        featureSet = np.empty((cb.caseBaseSize, 85))
+                    elif featureSelectionMode == 0 or featureSelectionMode == 2:
+                        if featureSelectionMode == 0:
+                            numFeatures = 85
+                        else:
+                            numFeatures = 1109
+                        featureSet = np.empty((cb.caseBaseSize, numFeatures))
                         labels = np.empty(cb.caseBaseSize)
                         keys = tuple(cb.cases.keys())
                         for c in range(len(keys)):
@@ -247,8 +251,11 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                             for f in range(len(features)):
                                 featureSet[c][f] = cb.cases[keys[c]].features[features[f]].value
                             labels[c] = classes[cb.cases[keys[c]].result[0]]
-                        weighter = FeatureNetwork(None, 85, 50)
-                        weighter.train(featureSet, labels, 80) #TODO: set this based on epochs testing
+                        weighter = FeatureNetwork(None, numFeatures, 50)
+                        if featureSelectionMode == 0:
+                            weighter.train(featureSet, labels, 80)
+                        else:
+                            weighter.train(featureSet, labels, 80) #TODO: set this based on epochs testing
                         for c in range(len(keys)):
                             features = tuple(cb.cases[keys[c]].features.keys())
                             absoluteMax = 0.0
@@ -274,12 +281,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                             for featureName in cb.cases[caseHash].features.keys():
                                 cb.cases[caseHash].features[featureName].setWeight(cb.cases[caseHash].features[featureName].getWeight() / absoluteMax)
 
-                    elif featureSelectionMode == 2:
-                        pass
-                        #TODO: implement???
-
                     print("weights generated and applied")
-                return
                 
                 results[k][randomness].append(duplicatedFeatureValidation(cb, 1000))
                 print(str(k) + "," + str(randomness) + ",", results[k][randomness])
