@@ -188,10 +188,10 @@ def run(runningSystem:str):
                         network.train(fullTrain, np.array(labels), i)
                         prediction = network.predict(fullTrain)
                         accuracyCount = 0
-                        for j in range(50):
-                            if j == np.argmax(prediction[j]):
+                        for j in range(len(labels)):
+                            if labels[j] == np.argmax(prediction[j]):
                                 accuracyCount += 1
-                        results[i].append(accuracyCount / 50.0)
+                        results[i].append(accuracyCount / len(labels))
                         print(str(i) + "," + str(sum(results[i]) / float(len(results[i]))))
 
             if int(userInput[1]) == 0 or int(userInput[1]) == 2:
