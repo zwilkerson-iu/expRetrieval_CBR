@@ -88,7 +88,7 @@ Returns: A tuple containing numpy arrays of selected images and their correspond
 """
 def generateImageSample(numImagesPerAnimal:int, rootDir:str, k:int, featureSelectionMode:int = -1, randomBound:int = 0, weightsUsed:int = 0):
     imageRecord = {}
-    images = []
+    images = np.empty(50*numImagesPerAnimal)
     labels = np.empty(50 * numImagesPerAnimal)
     classes = os.listdir(rootDir + "awa2/JPEGImages")
     for index in range(len(classes)):
@@ -99,7 +99,7 @@ def generateImageSample(numImagesPerAnimal:int, rootDir:str, k:int, featureSelec
         #print(animal + "," + ",".join(x for x in imageTemps))
         for f in range(len(imageTemps)):
             temp = imread(rootDir + "awa2/JPEGImages/" + animal + "/" + imageTemps[f], as_gray = False)
-            images.append(temp)
+            images[index*numImagesPerAnimal+f] = temp
             labels[index*numImagesPerAnimal+f] = index
     record = open("../csvFiles/" + str(featureSelectionMode) + "_" + str(randomBound) + "_" + str(weightsUsed) + "_" + str(k) + ".csv", "w")
     for animal in imageRecord.keys():
@@ -191,7 +191,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                 try:
                     tf.keras.backend.clear_session()
                     network = DeepImageNetwork(numFeatures=features)
-                    resized_images = network.train(np.array(images), np.array(labels), numEpochs=50)
+                    resized_images = network.train(images, labels, numEpochs=50)
                     invalidImageExistsFlag = False
                 except:
                     print("invalid image found - resetting seed")
