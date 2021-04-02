@@ -255,7 +255,7 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                         if featureSelectionMode == 0:
                             weighter.train(featureSet, labels, 80)
                         else:
-                            weighter.train(featureSet, labels, 80) #TODO: set this based on epochs testing
+                            weighter.train(featureSet, labels, 5) #TODO: set this based on epochs testing
                         for c in range(len(keys)):
                             features = tuple(cb.cases[keys[c]].features.keys())
                             absoluteMax = 0.0
