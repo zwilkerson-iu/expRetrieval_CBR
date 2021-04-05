@@ -238,9 +238,11 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                                 cb.cases[caseHash].features[featureName].setWeight(newWeights[featureName])
                         print("new weights used")
 
-                    elif featureSelectionMode == 0 or featureSelectionMode == 2:
+                    else:
                         if featureSelectionMode == 0:
                             numFeatures = 85
+                        elif featureSelectionMode == 1:
+                            numFeatures = 1024
                         else:
                             numFeatures = 1109
                         featureSet = np.empty((cb.caseBaseSize, numFeatures))
@@ -254,6 +256,8 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                         weighter = FeatureNetwork(None, numFeatures, 50)
                         if featureSelectionMode == 0:
                             weighter.train(featureSet, weightLabels, 80)
+                        elif featureSelectionMode == 1:
+                            weighter.train(featureSet, weightLabels, 5)
                         else:
                             weighter.train(featureSet, weightLabels, 5) #TODO: set this based on epochs testing
                         for c in range(len(keys)):
@@ -268,18 +272,18 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                             for featureName in weightFeatures:
                                 cb.cases[keys[c]].features[featureName].setWeight(cb.cases[keys[c]].features[featureName].getWeight() / absoluteMax)
 
-                    elif featureSelectionMode == 1:
-                        newWeights = network.model.trainable_weights[-1].numpy()
-                        for caseHash in cb.cases.keys():
-                            absoluteMax = 0.0
-                            for featureName in cb.cases[caseHash].features.keys():
-                                weightSet = newWeights[int(featureName[7:])]
-                                weight = abs(weightSet[classes[cb.cases[caseHash].result[0]]])
-                                if weight > absoluteMax:
-                                    absoluteMax = weight
-                                cb.cases[caseHash].features[featureName].setWeight(weight)
-                            for featureName in cb.cases[caseHash].features.keys():
-                                cb.cases[caseHash].features[featureName].setWeight(cb.cases[caseHash].features[featureName].getWeight() / absoluteMax)
+                    # elif featureSelectionMode == 1:
+                    #     newWeights = network.model.trainable_weights[-1].numpy()
+                    #     for caseHash in cb.cases.keys():
+                    #         absoluteMax = 0.0
+                    #         for featureName in cb.cases[caseHash].features.keys():
+                    #             weightSet = newWeights[int(featureName[7:])]
+                    #             weight = abs(weightSet[classes[cb.cases[caseHash].result[0]]])
+                    #             if weight > absoluteMax:
+                    #                 absoluteMax = weight
+                    #             cb.cases[caseHash].features[featureName].setWeight(weight)
+                    #         for featureName in cb.cases[caseHash].features.keys():
+                    #             cb.cases[caseHash].features[featureName].setWeight(cb.cases[caseHash].features[featureName].getWeight() / absoluteMax)
 
                     print("weights generated and applied")
                 
