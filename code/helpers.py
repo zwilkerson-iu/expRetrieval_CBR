@@ -67,9 +67,10 @@ Returns: the accuracy percentage of the case base over all tests as a decimal
 """
 def duplicatedFeatureValidation(caseBase:CaseBase, numberOfIterations:int, k:int = 2):
     correctClassifications = 0
-    for _ in range(numberOfIterations):
-        caseIndex = random.randint(0, caseBase.caseBaseSize - 1)
-        case = caseBase.retrieveCase(list(caseBase.cases.keys())[caseIndex])
+    for i in range(numberOfIterations):
+        # caseIndex = random.randint(0, caseBase.caseBaseSize - 1)
+        # case = caseBase.retrieveCase(list(caseBase.cases.keys())[caseIndex])
+        case = caseBase.retrieveCase(list(caseBase.cases.keys())[i])
         neighbors = caseBase.getKClosestCases(case, k)
         queryResult = majorityRule(caseBase, neighbors[1:])
         if queryResult == case.result:
@@ -287,7 +288,8 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
 
                     print("weights generated and applied")
                 
-                results[k][randomness].append(duplicatedFeatureValidation(cb, 1000))
+                # results[k][randomness].append(duplicatedFeatureValidation(cb, 1000))
+                results[k][randomness].append(duplicatedFeatureValidation(cb, cb.caseBaseSize))
                 print(str(k) + "," + str(randomness) + ",", results[k][randomness])
 
     for r in results[k].keys():
