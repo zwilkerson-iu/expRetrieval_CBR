@@ -172,7 +172,7 @@ def run(runningSystem:str):
                     outputs = extractor.predict(resized_images)
                     print("learned features generated")
 
-                    fullTrain = np.empty((1000, 1109))
+                    fullTrain = np.empty((500, 1109))
                     for c in range(50):
                         for e in range(10):
                             for f in range(1109):
