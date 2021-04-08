@@ -234,12 +234,15 @@ class Reader:
                 record.close()
         elif arg1 == 1:
             for example in results.keys():
-                record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")
-                record.write("average,stdev,raw values\n")
-                stdev = statistics.stdev(results[example])
-                ave = sum(results[example]) / float(len(results[example]))
-                record.write(str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example])) + "\n")
-                record.close()
+                try:
+                    record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")
+                    record.write("average,stdev,raw values\n")
+                    stdev = statistics.stdev(results[example])
+                    ave = sum(results[example]) / float(len(results[example]))
+                    record.write(str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example])) + "\n")
+                    record.close()
+                except:
+                    continue
         elif arg1 == 2:
             for example in results.keys():
                 record = open(rootDir + "finalResults/" + str(arg1) + "_" + str(arg2) + "_" + str(arg3) + "_" + str(example) + "_finalResults.csv", "w")

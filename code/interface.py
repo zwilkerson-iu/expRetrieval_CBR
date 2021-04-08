@@ -96,10 +96,10 @@ def run(runningSystem:str):
                     results[k] = ([],[])
                 for m in range(iterStart, iterStart+NUMITERATIONS):
                     for i in range(10, maxNumEpochs+1, 10): #CHANGE THESE TOGETHER
-                        images, labels = helpers.generateImageSample(40, rootDir, m, weightsUsed=maxNumEpochs)
+                        images, labels = helpers.generateImageSample(20, rootDir, m, weightsUsed=maxNumEpochs)
                         train_images, train_labels, test_images, test_labels = [], [], [], []
                         for index in range(len(labels)):
-                            if index % 40 < 20:
+                            if index % 20 < 10:
                                 test_images.append(images[index])
                                 test_labels.append(labels[index])
                             else:
@@ -118,10 +118,10 @@ def run(runningSystem:str):
                             except:
                                 print("invalid image found - resetting seed")
                                 print(len(train_images), len(train_labels), len(test_images), len(test_labels))
-                                images, labels = helpers.generateImageSample(40, rootDir, m, weightsUsed=maxNumEpochs)
+                                images, labels = helpers.generateImageSample(20, rootDir, m, weightsUsed=maxNumEpochs)
                                 train_images, train_labels, test_images, test_labels = [], [], [], []
                                 for index in range(len(labels)):
-                                    if index % 40 < 20:
+                                    if index % 20 < 10:
                                         test_images.append(images[index])
                                         test_labels.append(labels[index])
                                     else:
@@ -138,15 +138,15 @@ def run(runningSystem:str):
                         for j in range(len(train_labels)):
                             if train_labels[j] == np.argmax(train_pred[j]):
                                 accuracyCount += 1
-                        results[i][0].append(accuracyCount / (20*50.0))
-                        print(accuracyCount / (20*50.0))
+                        results[i][0].append(accuracyCount / (10*50.0))
+                        print(accuracyCount / (10*50.0))
                         accuracyCount = 0
                         # print(test_labels)
                         for j in range(len(test_labels)):
                             if test_labels[j] == np.argmax(test_pred[j]):
                                 accuracyCount += 1
-                        results[i][1].append(accuracyCount / (20*50.0))
-                        print(accuracyCount / (20*50.0))
+                        results[i][1].append(accuracyCount / (10*50.0))
+                        print(accuracyCount / (10*50.0))
                 for k in results.keys():
                     print(str(k) + "," + str(sum(results[k][0]) / float(len(results[k][0]))) + "," + str(sum(results[k][1]) / float(len(results[k][1]))))
 
@@ -155,7 +155,7 @@ def run(runningSystem:str):
                     results[k] = []
                 _, train, _ = Reader().readAwAForNN(rootDir)
                 for m in range(iterStart, iterStart+NUMITERATIONS):
-                    images, labels = helpers.generateImageSample(20, rootDir, m, -2, 0, maxNumEpochs)
+                    images, labels = helpers.generateImageSample(10, rootDir, m, -2, 0, maxNumEpochs)
                     invalidImageExistsFlag = True
                     while invalidImageExistsFlag:
                         try:
@@ -165,7 +165,7 @@ def run(runningSystem:str):
                             invalidImageExistsFlag = False
                         except:
                             print("invalid image found - resetting seed")
-                            images, labels = helpers.generateImageSample(20, rootDir, m, -2, 0, maxNumEpochs)
+                            images, labels = helpers.generateImageSample(10, rootDir, m, -2, 0, maxNumEpochs)
                             continue
                     extractor = tf.keras.Model(inputs=network.model.input,\
                                                 outputs=network.model.layers[len(network.model.layers)-2].output)
@@ -174,12 +174,12 @@ def run(runningSystem:str):
 
                     fullTrain = np.empty((1000, 1109))
                     for c in range(50):
-                        for e in range(20):
+                        for e in range(10):
                             for f in range(1109):
                                 if f < 85:
-                                    fullTrain[c*20+e][f] = train[c][f]
+                                    fullTrain[c*10+e][f] = train[c][f]
                                 else:
-                                    fullTrain[c*20+e][f] = outputs[c*20+e][f-85]
+                                    fullTrain[c*10+e][f] = outputs[c*10+e][f-85]
                     print("full train feature vector assembled")
 
                     for i in range(1, maxNumEpochs+1):
