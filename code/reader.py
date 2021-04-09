@@ -213,7 +213,7 @@ class Reader:
                 for l in range(len(lines)):
                     words = lines[l].split(",")
                     if words[0] != "average" and words[0] != "stdev":
-                        if l % 2 == 0 or arg2 == 0:
+                        if l % 2 == 0 or arg2 == 0 or arg2 == 2:
                             if results["train"].get(int(words[0])) is None:
                                 results["train"][int(words[0])] = []
                             for i in range(1, 6):
