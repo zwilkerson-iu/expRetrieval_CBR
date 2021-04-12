@@ -78,8 +78,8 @@ class FeatureNetwork:
             self.model = tf.keras.Sequential([
                 # tf.keras.layers.Dense(numInputs, activation="relu"), #Is this necessary, or extra layer?
                 # tf.keras.layers.Dense(numInputs, activation="sigmoid"),
-                # tf.keras.layers.Dense(numOutputs, use_bias=False, activation="relu") #TODO: test use_bias = False
-                tf.keras.layers.Dense(numOutputs, use_bias=False)
+                tf.keras.layers.Dense(numOutputs, use_bias=False, activation="relu") #TODO: test use_bias = False
+                # tf.keras.layers.Dense(numOutputs, use_bias=False)
             ])
 
             self.model.compile(optimizer='adam',
