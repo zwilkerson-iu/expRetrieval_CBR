@@ -245,7 +245,8 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
                         elif featureSelectionMode == 1:
                             numFeatures = 1024
                         else:
-                            numFeatures = 1109
+                            numFeatures = len(tuple(cb.cases[tuple(cb.cases.keys())[0]].features.keys()))
+                        print(numFeatures)
                         featureSet = np.empty((cb.caseBaseSize, numFeatures))
                         weightLabels = np.empty(cb.caseBaseSize)
                         keys = tuple(cb.cases.keys())
