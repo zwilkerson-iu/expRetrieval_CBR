@@ -207,7 +207,8 @@ def runTests(numIterations:tuple, features:int, examplesPerAnimal:int, rootDir:s
             randStart = 1
             randEnd = randomBound
         else:
-            randStart = randomBound
+            # randStart = randomBound
+            randStart = 2 #TODO: revert!!!
             randEnd = randomBound+1
         for randomness in range(randStart, randEnd):
             results[k][randomness] = []
