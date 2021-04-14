@@ -125,9 +125,9 @@ class Reader:
     """
     def analyzeData(self, rootDir:str, arg1:int, arg2:int, arg3:int = 0):
         if arg1 == 0 or arg1 == 2 or arg1 == 4:
-            results = {10:{}, 20:{}}
+            results = {10:{}}
         elif arg1 == 1:
-            results = {10:[], 20:[]}
+            results = {10:[]}
         else:
             if arg2 == 1:
                 results = {"train":{}, "test":{}}
