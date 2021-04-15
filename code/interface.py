@@ -42,6 +42,13 @@ def run(runningSystem:str):
                 Reader().analyzeData(saveDir, arg1, arg2)
 
         #===================================
+        #Create figures
+        elif userInput[0] == "f":
+            arg1 = False if userInput[1] == "0" else True
+            arg2 = int(userInput[2])
+            Reader().createFigure(arg1, saveDir, arg2)
+
+        #===================================
         #Run tests, considering learned features/weights
         
         # UserInput key:

@@ -3,6 +3,7 @@ from feature import Feature
 import numpy as np
 import os
 import statistics
+import matplotlib.pyplot as plt
 
 class Reader:
 
@@ -274,3 +275,168 @@ class Reader:
                         record.write(str(feature) + "," + str(multiplier) + "," + str(ave) + "," + str(stdev) + "," + ",".join(map(str, results[example][feature][multiplier])) + "\n")
                     record.write("\n")
                 record.close()
+
+    #TODO: documentation
+    def createFigure(self, unweighted:bool, rootDir:str, centroid:int, centroid2 = 8):
+        dataPoints = {"KE":{}, "CFE":{}, "Both":{}}
+        t = {"0":"KE", "1":"CFE", "2":"Both"}
+        if unweighted:
+            files1 = ("0_0_0_10_finalResults.csv", "1_0_0_10_finalResults.csv", "2_0_0_10_finalResults.csv")
+            files2 = ("0_0_100_10_finalResults.csv", "1_0_100_10_finalResults.csv", "2_0_100_10_finalResults.csv")
+            #Initial data
+            for filename in files1:
+                reader = open(rootDir + "finalResults/" + filename, "r")
+                lines = reader.readlines()
+                if filename[0] == "0":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if abs(int(words[0]) - centroid) <= 1:
+                            if dataPoints[t[filename[0]]].get(int(words[0])) is None:
+                                dataPoints[t[filename[0]]][int(words[0])] = []
+                            for i in range(3, len(words)):
+                                dataPoints[t[filename[0]]][int(words[0])].append(float(words[i]))
+                elif filename[0] == "1":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        for key in dataPoints["KE"].keys():
+                            dataPoints[t[filename[0]]][key] = []
+                            for i in range(2, len(words)):
+                                    dataPoints[t[filename[0]]][key].append(float(words[i]))
+                elif filename[0] == "2":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if abs(int(words[0]) - centroid) <= 1 and int(words[1]) == 100:
+                            if dataPoints[t[filename[0]]].get(int(words[0])) is None:
+                                dataPoints[t[filename[0]]][int(words[0])] = []
+                            for i in range(4, len(words)):
+                                dataPoints[t[filename[0]]][int(words[0])].append(float(words[i]))
+            #plots
+            figure = plt.figure(constrained_layout=True)
+            plots = figure.subplots(2, 3, squeeze=False)
+            for j in range(3):
+                stdevs = (statistics.stdev(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
+                            statistics.stdev(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.stdev(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
+                means = (statistics.mean(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
+                            statistics.mean(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.mean(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
+                # for a, b in enumerate(means):
+                #     plots[0, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
+                plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+            #More trials
+            for filename in files2:
+                reader = open(rootDir + "finalResults/" + filename, "r")
+                lines = reader.readlines()
+                if filename[0] == "0":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if abs(int(words[0]) - centroid) <= 1:
+                            for i in range(3, len(words)):
+                                dataPoints[t[filename[0]]][int(words[0])].append(float(words[i]))
+                elif filename[0] == "1":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        for key in dataPoints["KE"].keys():
+                            for i in range(2, len(words)):
+                                    dataPoints[t[filename[0]]][key].append(float(words[i]))
+                elif filename[0] == "2":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if abs(int(words[0]) - centroid) <= 1 and int(words[1]) == 100:
+                            for i in range(4, len(words)):
+                                dataPoints[t[filename[0]]][int(words[0])].append(float(words[i]))
+            #More plots
+            for j in range(3):
+                stdevs = (statistics.stdev(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
+                            statistics.stdev(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.stdev(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
+                means = (statistics.mean(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
+                            statistics.mean(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.mean(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
+                # for a, b in enumerate(means):
+                #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
+                plots[1, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+            figure.savefig(rootDir + "finalResults/unweightedFigure.png")
+
+        else:
+            dataPointsRELU = {"KE":{}, "CFE":{}, "Both":{}}
+            files = ("0_1_0_10_finalResults.csv", "0_1_30_10_finalResults.csv", "1_1_0_10_finalResults.csv",
+                        "1_1_30_10_finalResults.csv", "2_1_0_10_finalResults.csv", "2_1_30_10_finalResults.csv")
+            for filename in files:
+                reader = open(rootDir + "finalResults/" + filename, "r")
+                lines = reader.readlines()
+                if filename[0] == "0":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if filename[4] == "0":
+                            if abs(int(words[0]) - centroid) <= 1:
+                                if dataPoints[t[filename[0]]].get(int(words[0])) is None:
+                                    dataPoints[t[filename[0]]][int(words[0])] = []
+                                for i in range(3, len(words)):
+                                    dataPoints[t[filename[0]]][int(words[0])].append(float(words[i]))
+                        else:
+                            if abs(int(words[0]) - centroid2) <= 1:
+                                if dataPointsRELU[t[filename[0]]].get(int(words[0])) is None:
+                                    dataPointsRELU[t[filename[0]]][int(words[0])] = []
+                                for i in range(3, len(words)):
+                                    dataPointsRELU[t[filename[0]]][int(words[0])].append(float(words[i]))
+                elif filename[0] == "1":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if filename[4] == "0":
+                            for key in dataPoints["KE"].keys():
+                                dataPoints[t[filename[0]]][key] = []
+                                for i in range(2, len(words)):
+                                        dataPoints[t[filename[0]]][key].append(float(words[i]))
+                        else:
+                            for key in dataPointsRELU["KE"].keys():
+                                dataPointsRELU[t[filename[0]]][key] = []
+                                for i in range(2, len(words)):
+                                        dataPointsRELU[t[filename[0]]][key].append(float(words[i]))
+                elif filename[0] == "2":
+                    for l in range(1, len(lines)):
+                        line = lines[l]
+                        words = line.strip().split(",")
+                        if filename[4] == "0":
+                            if abs(int(words[0]) - centroid) <= 1 and int(words[1]) == 100:
+                                if dataPoints[t[filename[0]]].get(int(words[0])) is None:
+                                    dataPoints[t[filename[0]]][int(words[0])] = []
+                                for i in range(4, len(words)):
+                                    dataPoints[t[filename[0]]][int(words[0])].append(float(words[i]))
+                        else:
+                            if abs(int(words[0]) - centroid2) <= 1 and int(words[1]) == 100:
+                                if dataPointsRELU[t[filename[0]]].get(int(words[0])) is None:
+                                    dataPointsRELU[t[filename[0]]][int(words[0])] = []
+                                for i in range(4, len(words)):
+                                    dataPointsRELU[t[filename[0]]][int(words[0])].append(float(words[i]))
+            figure = plt.figure(constrained_layout=True)
+            plots = figure.subplots(2, 3, squeeze=False)
+            for j in range(3):
+                stdevs = (statistics.stdev(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
+                            statistics.stdev(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.stdev(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
+                means = (statistics.mean(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
+                            statistics.mean(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.mean(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
+                # for a, b in enumerate(means):
+                #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
+                plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+            for j in range(2):
+                stdevs = (statistics.stdev(dataPointsRELU["KE"][tuple(dataPointsRELU["KE"].keys())[j]]),
+                            statistics.stdev(dataPointsRELU["CFE"][tuple(dataPointsRELU["CFE"].keys())[j]]),
+                            statistics.stdev(dataPointsRELU["Both"][tuple(dataPointsRELU["Both"].keys())[j]]))
+                means = (statistics.mean(dataPointsRELU["KE"][tuple(dataPointsRELU["KE"].keys())[j]]),
+                            statistics.mean(dataPointsRELU["CFE"][tuple(dataPointsRELU["CFE"].keys())[j]]),
+                            statistics.mean(dataPointsRELU["Both"][tuple(dataPointsRELU["Both"].keys())[j]]))
+                # for a, b in enumerate(means):
+                #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
+                plots[1, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+            figure.savefig(rootDir + "finalResults/weightedFigure.png")
