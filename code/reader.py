@@ -429,7 +429,7 @@ class Reader:
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
                 plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
-            for j in range(2):
+            for j in range(3):
                 stdevs = (statistics.stdev(dataPointsRELU["KE"][tuple(dataPointsRELU["KE"].keys())[j]]),
                             statistics.stdev(dataPointsRELU["CFE"][tuple(dataPointsRELU["CFE"].keys())[j]]),
                             statistics.stdev(dataPointsRELU["Both"][tuple(dataPointsRELU["Both"].keys())[j]]))
