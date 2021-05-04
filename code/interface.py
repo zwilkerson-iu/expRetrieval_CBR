@@ -30,6 +30,20 @@ def run(runningSystem:str):
             print("Terminating program")
             break
 
+        #Toy script to retrieve interval information from continous KE feature values
+        # elif userInput[0] == "m":
+        #     minVal = sys.maxsize
+        #     maxVal = -sys.maxsize
+        #     _, train, _ = Reader().readAwAForNN(rootDir)
+        #     for c in range(len(train)):
+        #         for i in range(len(train[0])):
+        #             if train[c][i] < minVal:
+        #                 minVal = train[c][i]
+        #             if train[c][i] > maxVal:
+        #                 maxVal = train[c][i]
+        #     print(minVal)
+        #     print(maxVal)
+
         #===================================
         #Perform data analysis/reformatting
         elif userInput[0] == "a":

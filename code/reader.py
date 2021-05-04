@@ -280,6 +280,7 @@ class Reader:
     def createFigure(self, unweighted:bool, rootDir:str, centroid:int, centroid2 = 8):
         dataPoints = {"KE":{}, "CFE":{}, "Both":{}}
         t = {"0":"KE", "1":"CFE", "2":"Both"}
+        titles = ("A", "B", "C", "D", "E", "F")
         if unweighted:
             files1 = ("0_0_0_10_finalResults.csv", "1_0_0_10_finalResults.csv", "2_0_0_10_finalResults.csv")
             files2 = ("0_0_100_10_finalResults.csv", "1_0_100_10_finalResults.csv", "2_0_100_10_finalResults.csv")
@@ -326,6 +327,8 @@ class Reader:
                 # for a, b in enumerate(means):
                 #     plots[0, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
                 plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[0, j].set_title(titles[j])
+                plots[0, j].set_ylim([0.0,0.75])
             #More trials
             for filename in files2:
                 reader = open(rootDir + "finalResults/" + filename, "r")
@@ -362,6 +365,8 @@ class Reader:
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
                 plots[1, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[1, j].set_title(titles[3+j])
+                plots[1, j].set_ylim([0.0,0.75])
             figure.savefig(rootDir + "finalResults/unweightedFigure.png")
 
         else:
@@ -429,6 +434,8 @@ class Reader:
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
                 plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[0, j].set_title(titles[j])
+                plots[0, j].set_ylim([0.0,0.75])
             for j in range(3):
                 stdevs = (statistics.stdev(dataPointsRELU["KE"][tuple(dataPointsRELU["KE"].keys())[j]]),
                             statistics.stdev(dataPointsRELU["CFE"][tuple(dataPointsRELU["CFE"].keys())[j]]),
@@ -439,4 +446,6 @@ class Reader:
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
                 plots[1, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[1, j].set_title(titles[3+j])
+                plots[1, j].set_ylim([0.0,0.75])
             figure.savefig(rootDir + "finalResults/weightedFigure.png")
