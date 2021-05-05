@@ -278,8 +278,8 @@ class Reader:
 
     #TODO: documentation
     def createFigure(self, unweighted:bool, rootDir:str, centroid:int, centroid2 = 8):
-        dataPoints = {"KE":{}, "CFE":{}, "Both":{}}
-        t = {"0":"KE", "1":"CFE", "2":"Both"}
+        dataPoints = {"KE":{}, "NL":{}, "Both":{}}
+        t = {"0":"KE", "1":"NL", "2":"Both"}
         titles = ("A", "B", "C", "D", "E", "F")
         if unweighted:
             files1 = ("0_0_0_10_finalResults.csv", "1_0_0_10_finalResults.csv", "2_0_0_10_finalResults.csv")
@@ -319,14 +319,14 @@ class Reader:
             plots = figure.subplots(2, 3, squeeze=False)
             for j in range(3):
                 stdevs = (statistics.stdev(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
-                            statistics.stdev(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.stdev(dataPoints["NL"][tuple(dataPoints["NL"].keys())[j]]),
                             statistics.stdev(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
                 means = (statistics.mean(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
-                            statistics.mean(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.mean(dataPoints["NL"][tuple(dataPoints["NL"].keys())[j]]),
                             statistics.mean(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
                 # for a, b in enumerate(means):
                 #     plots[0, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
-                plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[0, j].bar(["KE", "NL", "Both"], means, yerr=stdevs, capsize=4.0)
                 plots[0, j].set_title(titles[j])
                 plots[0, j].set_ylim([0.0,0.75])
             #More trials
@@ -357,20 +357,20 @@ class Reader:
             #More plots
             for j in range(3):
                 stdevs = (statistics.stdev(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
-                            statistics.stdev(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.stdev(dataPoints["NL"][tuple(dataPoints["NL"].keys())[j]]),
                             statistics.stdev(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
                 means = (statistics.mean(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
-                            statistics.mean(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.mean(dataPoints["NL"][tuple(dataPoints["NL"].keys())[j]]),
                             statistics.mean(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
-                plots[1, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[1, j].bar(["KE", "NL", "Both"], means, yerr=stdevs, capsize=4.0)
                 plots[1, j].set_title(titles[3+j])
                 plots[1, j].set_ylim([0.0,0.75])
             figure.savefig(rootDir + "finalResults/unweightedFigure.png")
 
         else:
-            dataPointsRELU = {"KE":{}, "CFE":{}, "Both":{}}
+            dataPointsRELU = {"KE":{}, "NL":{}, "Both":{}}
             files = ("0_1_0_10_finalResults.csv", "0_1_30_10_finalResults.csv", "1_1_0_10_finalResults.csv",
                         "1_1_30_10_finalResults.csv", "2_1_0_10_finalResults.csv", "2_1_30_10_finalResults.csv")
             for filename in files:
@@ -426,26 +426,26 @@ class Reader:
             plots = figure.subplots(2, 3, squeeze=False)
             for j in range(3):
                 stdevs = (statistics.stdev(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
-                            statistics.stdev(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.stdev(dataPoints["NL"][tuple(dataPoints["NL"].keys())[j]]),
                             statistics.stdev(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
                 means = (statistics.mean(dataPoints["KE"][tuple(dataPoints["KE"].keys())[j]]),
-                            statistics.mean(dataPoints["CFE"][tuple(dataPoints["CFE"].keys())[j]]),
+                            statistics.mean(dataPoints["NL"][tuple(dataPoints["NL"].keys())[j]]),
                             statistics.mean(dataPoints["Both"][tuple(dataPoints["Both"].keys())[j]]))
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
-                plots[0, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[0, j].bar(["KE", "NL", "Both"], means, yerr=stdevs, capsize=4.0)
                 plots[0, j].set_title(titles[j])
                 plots[0, j].set_ylim([0.0,0.75])
             for j in range(3):
                 stdevs = (statistics.stdev(dataPointsRELU["KE"][tuple(dataPointsRELU["KE"].keys())[j]]),
-                            statistics.stdev(dataPointsRELU["CFE"][tuple(dataPointsRELU["CFE"].keys())[j]]),
+                            statistics.stdev(dataPointsRELU["NL"][tuple(dataPointsRELU["NL"].keys())[j]]),
                             statistics.stdev(dataPointsRELU["Both"][tuple(dataPointsRELU["Both"].keys())[j]]))
                 means = (statistics.mean(dataPointsRELU["KE"][tuple(dataPointsRELU["KE"].keys())[j]]),
-                            statistics.mean(dataPointsRELU["CFE"][tuple(dataPointsRELU["CFE"].keys())[j]]),
+                            statistics.mean(dataPointsRELU["NL"][tuple(dataPointsRELU["NL"].keys())[j]]),
                             statistics.mean(dataPointsRELU["Both"][tuple(dataPointsRELU["Both"].keys())[j]]))
                 # for a, b in enumerate(means):
                 #     plots[1, j].text(b, a, str(round(b, 3)), color='blue', fontweight='bold')
-                plots[1, j].bar(["KE", "CFE", "Both"], means, yerr=stdevs, capsize=4.0)
+                plots[1, j].bar(["KE", "NL", "Both"], means, yerr=stdevs, capsize=4.0)
                 plots[1, j].set_title(titles[3+j])
                 plots[1, j].set_ylim([0.0,0.75])
             figure.savefig(rootDir + "finalResults/weightedFigure.png")
